@@ -4,28 +4,36 @@ import 'package:uuid/uuid.dart';
 import '../../../core/services/notification_service.dart';
 
 class ZikrProvider extends ChangeNotifier {
-  final Box _box = Hive.box('userBox');
+  // Ensure you opened this box in main.dart before using it here
+  final Box _box = Hive.box('userBox'); 
   final NotificationService _notificationService = NotificationService();
   
   List<Map<String, dynamic>> _zikrList = [];
 
   List<Map<String, dynamic>> get zikrList => _zikrList;
 
-  // Load data and handle daily reset
+  // --- 1. Load Data ---
   void loadZikrData() {
     final rawList = _box.get('zikr_list', defaultValue: []);
-    _zikrList = List<Map<String, dynamic>>.from(rawList.map((e) => Map<String, dynamic>.from(e)));
+    // distinct conversion to ensure type safety
+    _zikrList = List<Map<String, dynamic>>.from(
+      rawList.map((e) => Map<String, dynamic>.from(e))
+    );
     
     _checkDailyReset();
     notifyListeners();
   }
 
+  // --- 2. Daily Reset Logic ---
   void _checkDailyReset() {
     final String today = DateTime.now().toIso8601String().split('T')[0];
     bool needsSave = false;
 
     for (var zikr in _zikrList) {
-      if (zikr['lastUpdatedDate'] != today) {
+      // Check if lastUpdated exists, if not, set it to today
+      String lastDate = zikr['lastUpdatedDate'] ?? today;
+
+      if (lastDate != today) {
         zikr['currentCount'] = 0; // Reset count
         zikr['lastUpdatedDate'] = today;
         needsSave = true;
@@ -35,13 +43,14 @@ class ZikrProvider extends ChangeNotifier {
     if (needsSave) _saveToHive();
   }
 
+  // --- 3. Add Zikr ---
   Future<void> addZikr(String name, int target) async {
     final newZikr = {
       'id': const Uuid().v4(),
       'name': name,
       'currentCount': 0,
       'targetCount': target,
-      'reminderTime': null,
+      'reminderTime': null, // Stored as "HH:MM" string or null
       'lastUpdatedDate': DateTime.now().toIso8601String().split('T')[0],
     };
 
@@ -50,6 +59,41 @@ class ZikrProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // --- 4. UPDATE ZIKR (The Missing Method!) ---
+  // This is required by ZikrDetailScreen to save edits
+  Future<void> updateZikr(String id, String newName, int newTarget, int newCount, String? newReminder) async {
+    final index = _zikrList.indexWhere((element) => element['id'] == id);
+    
+    if (index != -1) {
+      _zikrList[index]['name'] = newName;
+      _zikrList[index]['targetCount'] = newTarget;
+      _zikrList[index]['currentCount'] = newCount;
+      _zikrList[index]['reminderTime'] = newReminder;
+      _zikrList[index]['lastUpdatedDate'] = DateTime.now().toIso8601String().split('T')[0];
+
+      // Handle Notification Logic
+      if (newReminder != null && newReminder.isNotEmpty) {
+        // Parse "HH:MM" string back to TimeOfDay
+        final parts = newReminder.split(':');
+        final time = TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+        
+        await _notificationService.scheduleDailyNotification(
+          id: id.hashCode, 
+          title: "Zikr Reminder",
+          body: "It's time for $newName",
+          time: time,
+        );
+      } else {
+        // If reminder was removed, cancel the notification
+        await _notificationService.cancelNotification(id.hashCode);
+      }
+
+      await _saveToHive();
+      notifyListeners();
+    }
+  }
+
+  // --- 5. Quick Update Count (For List Screen) ---
   Future<void> updateCount(String id, int newCount) async {
     final index = _zikrList.indexWhere((element) => element['id'] == id);
     if (index != -1) {
@@ -60,14 +104,13 @@ class ZikrProvider extends ChangeNotifier {
     }
   }
 
+  // --- 6. Update Reminder Only ---
   Future<void> updateReminder(String id, TimeOfDay time) async {
     final index = _zikrList.indexWhere((element) => element['id'] == id);
     if (index != -1) {
-      // 1. Save time string
       final timeString = '${time.hour}:${time.minute.toString().padLeft(2, '0')}';
       _zikrList[index]['reminderTime'] = timeString;
       
-      // 2. Schedule Notification (Use ID hashcode for unique notification ID)
       await _notificationService.scheduleDailyNotification(
         id: id.hashCode, 
         title: "Zikr Reminder",
@@ -80,10 +123,9 @@ class ZikrProvider extends ChangeNotifier {
     }
   }
 
+  // --- 7. Delete ---
   Future<void> deleteZikr(String id) async {
-    // Cancel notification if exists
     await _notificationService.cancelNotification(id.hashCode);
-    
     _zikrList.removeWhere((element) => element['id'] == id);
     await _saveToHive();
     notifyListeners();

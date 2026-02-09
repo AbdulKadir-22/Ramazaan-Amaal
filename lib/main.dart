@@ -28,8 +28,8 @@ class RamazanTrackerApp extends StatelessWidget {
         // Make UserProvider available throughout the app
         ChangeNotifierProvider(create: (_) => UserProvider()..loadUser()),
         ChangeNotifierProvider(create: (_) => DailyProgressProvider()),
-        ChangeNotifierProvider(create: (_) => ZikrProvider()),
-        ChangeNotifierProvider(create: (_) => TilawatProvider()),
+        ChangeNotifierProvider(create: (_) => ZikrProvider()..loadZikrData()),
+        ChangeNotifierProvider(create: (_) => TilawatProvider()..loadTilawatData()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

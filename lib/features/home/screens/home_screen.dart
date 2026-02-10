@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:hijri/hijri_calendar.dart';
+import 'package:intl/intl.dart';
 
 // --- Import Core & Providers ---
 import '../../../core/constants/app_colors.dart';
@@ -140,6 +142,12 @@ class _HomeContent extends StatelessWidget {
   // --- Helper Widgets ---
 
   Widget _buildHeader() {
+    final now = DateTime.now();
+    final gregorianDate = DateFormat('d MMMM').format(now);
+    
+    final hijriDate = HijriCalendar.now();
+    final hijriString = "${hijriDate.hDay} ${hijriDate.longMonthName}";
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -154,9 +162,9 @@ class _HomeContent extends StatelessWidget {
         ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.end,
-          children: const [
-            Text("12 March | 1", style: TextStyle(fontSize: 14, color: AppColors.textGrey, fontWeight: FontWeight.w500)),
-            Text("Ramazan", style: TextStyle(fontSize: 14, color: AppColors.textGrey, fontWeight: FontWeight.w500)),
+          children: [
+            Text(gregorianDate, style: const TextStyle(fontSize: 14, color: AppColors.textGrey, fontWeight: FontWeight.w500)),
+            Text(hijriString, style: const TextStyle(fontSize: 14, color: AppColors.textGrey, fontWeight: FontWeight.w500)),
           ],
         ),
       ],
@@ -233,7 +241,7 @@ class _HomeContent extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: _cardDecoration(),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [const Text("Extra Namaz", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textDark)), TextButton(onPressed: () {}, child: const Text("Add more", style: TextStyle(color: Color(0xFF6C63FF), fontWeight: FontWeight.w500)))]),
+        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [const Text("Nawafil", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textDark)), TextButton(onPressed: () {}, child: const Text("Add more", style: TextStyle(color: Color(0xFF6C63FF), fontWeight: FontWeight.w500)))]),
         const SizedBox(height: 16),
         _buildExtraSalahItem(context, "Tahajjud", provider.isExtraSalahDone("Tahajjud")), const SizedBox(height: 14),
         _buildExtraSalahItem(context, "Ishraq", provider.isExtraSalahDone("Ishraq")), const SizedBox(height: 14),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../home/providers/daily_progress_provider.dart'; // Import DailyProgressProvider
 import '../providers/tilawat_provider.dart';
 
 class TilawatInputSection extends StatefulWidget {
@@ -42,6 +43,9 @@ class _TilawatInputSectionState extends State<TilawatInputSection> {
             onPressed: () {
               // Access Provider via context
               context.read<TilawatProvider>().addLog(selectedJuz, selectedPages);
+              
+              // Also update DailyProgressProvider for the Report Screen
+              context.read<DailyProgressProvider>().updateTilawatPages(selectedPages);
               
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(

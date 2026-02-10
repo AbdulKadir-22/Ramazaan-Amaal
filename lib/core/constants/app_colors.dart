@@ -8,4 +8,5 @@ class AppColors {
   static const Color textDark = Color(0xFF1A1F1D);           // Dark charcoal
   static const Color textGrey = Color(0xFF757575);           // Muted grey
   static const Color primary = Color(0xFF4C8C74);            // Sage Green
+  static const Color accent = Color(0xFFD4AF37);             // Gold/Accent (Adding this based on error)
 }

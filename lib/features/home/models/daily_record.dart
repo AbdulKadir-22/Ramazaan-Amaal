@@ -22,6 +22,9 @@ class DailyRecord extends HiveObject {
   @HiveField(6)
   final Map<String, bool> selfReflection;
 
+  @HiveField(7)
+  final String? notes;
+
   DailyRecord({
     required this.date,
     required this.salah,
@@ -29,6 +32,7 @@ class DailyRecord extends HiveObject {
     this.suhoorNiyat = false,
     this.tilawatPages = 0,
     Map<String, bool>? selfReflection,
+    this.notes,
   }) : selfReflection = selfReflection ?? {
           'Avoided Lying': false,
           'Avoided Backbiting': false,
@@ -62,6 +66,7 @@ class DailyRecord extends HiveObject {
         'Avoided Argument': false,
         'Controlled Negative Thoughts': false,
       },
+      notes: null,
     );
   }
 }

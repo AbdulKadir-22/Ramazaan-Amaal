@@ -18,7 +18,9 @@ class DailyProgressProvider extends ChangeNotifier {
   }
 
   // --- Suhoor Niyat ---
+  bool get isSuhoorNiyatMade => _todayRecord.suhoorNiyat; // Renamed/Aliased for compatibility
   bool get isSuhoorDone => _todayRecord.suhoorNiyat;
+  int get tilawatPages => _todayRecord.tilawatPages;
 
   void toggleSuhoor() {
     _todayRecord.suhoorNiyat = !_todayRecord.suhoorNiyat;
@@ -49,6 +51,42 @@ class DailyProgressProvider extends ChangeNotifier {
     bool current = isReflectionDone(name);
     _todayRecord.selfReflection[name] = !current;
     _saveProgress();
+  }
+
+  // --- Notes ---
+  String? get notes => _todayRecord.notes;
+
+  void updateNotes(String note) {
+    
+    final newRecord = DailyRecord(
+      date: _todayRecord.date,
+      salah: _todayRecord.salah,
+      extraSalah: _todayRecord.extraSalah,
+      suhoorNiyat: _todayRecord.suhoorNiyat,
+      tilawatPages: _todayRecord.tilawatPages,
+      selfReflection: _todayRecord.selfReflection,
+      notes: note,
+    );
+    
+    _storage.saveDailyRecord(newRecord);
+    _todayRecord = newRecord;
+    notifyListeners();
+  }
+
+  void updateTilawatPages(int pages) {
+    final newRecord = DailyRecord(
+      date: _todayRecord.date,
+      salah: _todayRecord.salah,
+      extraSalah: _todayRecord.extraSalah,
+      suhoorNiyat: _todayRecord.suhoorNiyat,
+      tilawatPages: _todayRecord.tilawatPages + pages,
+      selfReflection: _todayRecord.selfReflection,
+      notes: _todayRecord.notes,
+    );
+    
+    _storage.saveDailyRecord(newRecord);
+    _todayRecord = newRecord;
+    notifyListeners();
   }
   
   void _saveProgress() {

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:ramazaan_tracker/features/zikr/providers/zikr_provider.dart';
 import 'core/constants/app_colors.dart';
 import 'core/services/storage_service.dart';
+import 'core/services/notification_service.dart';
 import 'features/onboarding/providers/user_provider.dart';
 import 'features/home/providers/daily_progress_provider.dart';
 import 'features/tilawat/providers/tilawat_provider.dart';
@@ -12,8 +13,18 @@ void main() async {
   // Ensure Flutter bindings are initialized before Hive
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize Hive
-  await StorageService.init();
+  try {
+    // Initialize Hive
+    await StorageService.init();
+
+    // Initialize Notifications
+    final notificationService = NotificationService();
+    await notificationService.init();
+    await notificationService.requestPermissions();
+  } catch (e) {
+    debugPrint("Initialization Error: $e");
+    // In a real app, you might want to show an error screen here
+  }
 
   runApp(const RamazanTrackerApp());
 }
@@ -27,7 +38,7 @@ class RamazanTrackerApp extends StatelessWidget {
       providers: [
         // Make UserProvider available throughout the app
         ChangeNotifierProvider(create: (_) => UserProvider()..loadUser()),
-        ChangeNotifierProvider(create: (_) => DailyProgressProvider()),
+        ChangeNotifierProvider(create: (_) => DailyProgressProvider()..loadDailyProgress()),
         ChangeNotifierProvider(create: (_) => ZikrProvider()..loadZikrData()),
         ChangeNotifierProvider(create: (_) => TilawatProvider()..loadTilawatData()),
       ],

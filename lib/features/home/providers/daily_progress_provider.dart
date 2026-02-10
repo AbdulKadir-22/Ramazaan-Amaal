@@ -1,36 +1,62 @@
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:ramazaan_tracker/core/services/storage_service.dart';
+import 'package:ramazaan_tracker/features/home/models/daily_record.dart';
 
 class DailyProgressProvider extends ChangeNotifier {
-  final Box _box = Hive.box('userBox'); // Using the box opened in main.dart
-  
-  // Helper to get today's key string (e.g., "2024-03-12")
-  String get _todayKey => DateTime.now().toIso8601String().split('T')[0];
+  final StorageService _storage = StorageService();
+  late DailyRecord _todayRecord;
+
+  // Initialize with empty to avoid null check issues before loading
+  DailyProgressProvider() {
+    _todayRecord = DailyRecord.empty(DateTime.now());
+  }
+
+  Future<void> loadDailyProgress() async {
+    final now = DateTime.now();
+    _todayRecord = _storage.getDailyRecord(now) ?? DailyRecord.empty(now);
+    notifyListeners();
+  }
 
   // --- Suhoor Niyat ---
-  bool get isSuhoorDone => _box.get('${_todayKey}_suhoor', defaultValue: false);
+  bool get isSuhoorDone => _todayRecord.suhoorNiyat;
 
   void toggleSuhoor() {
-    bool current = isSuhoorDone;
-    _box.put('${_todayKey}_suhoor', !current);
-    notifyListeners();
+    _todayRecord.suhoorNiyat = !_todayRecord.suhoorNiyat;
+    _saveProgress();
   }
 
   // --- Extra Salah (Tahajjud, Ishraq, etc.) ---
-  bool isExtraSalahDone(String name) => _box.get('${_todayKey}_extra_$name', defaultValue: false);
+  bool isExtraSalahDone(String name) => _todayRecord.extraSalah[name] ?? false;
 
   void toggleExtraSalah(String name) {
     bool current = isExtraSalahDone(name);
-    _box.put('${_todayKey}_extra_$name', !current);
-    notifyListeners();
+    _todayRecord.extraSalah[name] = !current;
+    _saveProgress();
   }
 
   // --- Main Salah ---
-  // Returns true if the "Complete for Today" button was pressed for this prayer
-  bool isSalahCompleted(String name) => _box.get('${_todayKey}_salah_$name', defaultValue: false);
+  bool isSalahCompleted(String name) => _todayRecord.salah[name] ?? false;
 
   void setSalahCompleted(String name, bool status) {
-    _box.put('${_todayKey}_salah_$name', status);
+    _todayRecord.salah[name] = status;
+    _saveProgress();
+  }
+
+  // --- Daily Reflection ---
+  bool isReflectionDone(String name) => _todayRecord.selfReflection[name] ?? false;
+
+  void toggleReflection(String name) {
+    bool current = isReflectionDone(name);
+    _todayRecord.selfReflection[name] = !current;
+    _saveProgress();
+  }
+  
+  void _saveProgress() {
+    if (_todayRecord.isInBox) {
+      _todayRecord.save();
+    } else {
+      _storage.saveDailyRecord(_todayRecord);
+    }
     notifyListeners();
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart'; // Add this to pubspec.yaml if you want clickable links
 import 'manage_reminders_screen.dart';
 import 'add_past_entry_screen.dart';
+import '../widgets/admin_notification_sheet.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -102,7 +103,10 @@ class SettingsScreen extends StatelessWidget {
                   icon: Icons.notification_add_outlined,
                   title: "Send Notification",
                   showDivider: false,
-                  onTap: () {}, // Debug notification logic
+                  onTap: () {
+                    // Calling the function from our new widget file
+                    showAdminNotificationModal(context);
+                  }, 
                 ),
               ),
               const SizedBox(height: 40),
@@ -112,7 +116,7 @@ class SettingsScreen extends StatelessWidget {
                   SizedBox(height: 8),
                   Text("جزاك الله خيرا", style: TextStyle(color: Color(0xFF1A1F1D), fontSize: 16, fontFamily: 'Arial', fontWeight: FontWeight.w600)),
                   SizedBox(height: 8),
-                  Text("v1.2.4 (Build 482)", style: TextStyle(color: Color(0xFFBDBDBD), fontSize: 10)),
+                  Text("v1.0.0 (Build 482)", style: TextStyle(color: Color(0xFFBDBDBD), fontSize: 10)),
                 ]),
               ),
               const SizedBox(height: 20),

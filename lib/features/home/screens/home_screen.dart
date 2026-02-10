@@ -122,7 +122,11 @@ class _HomeContent extends StatelessWidget {
             _buildTilawatCard(context, tilawatProvider),
             const SizedBox(height: 16),
             
-            // 5. Zikr Card
+            // 5. Daily Reflection Card
+            _buildReflectionCard(context, progressProvider),
+            const SizedBox(height: 16),
+
+            // 6. Zikr Card
             _buildZikrCard(context, zikrList),
             
             // Bottom spacing to ensure content isn't hidden by navbar
@@ -205,7 +209,7 @@ class _HomeContent extends StatelessWidget {
   }
 
   Widget _buildSalahItem(BuildContext context, String name) {
-    final isCompleted = context.read<DailyProgressProvider>().isSalahCompleted(name);
+    final isCompleted = context.watch<DailyProgressProvider>().isSalahCompleted(name);
     return InkWell(
       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => SalahDetailScreen(prayerName: name))),
       child: Padding(
@@ -240,6 +244,11 @@ class _HomeContent extends StatelessWidget {
   }
 
   Widget _buildExtraSalahItem(BuildContext context, String name, bool isChecked) {
+    // Checkbox state typically comes from parent, but let's ensure we are reactive if needed
+    // In this specific build flow, `_buildExtraNamazCard` passes `provider.isExtraSalahDone`
+    // and `_buildExtraNamazCard` is called in `build` where `provider` is obtained via `watch`.
+    // So `isChecked` passed down SHOULD be correct if the parent rebuilds.
+    // Let's check `_buildSuhoorCard` too.
     return Row(children: [
       GestureDetector(
         onTap: () => context.read<DailyProgressProvider>().toggleExtraSalah(name),
@@ -281,6 +290,55 @@ class _HomeContent extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+
+  Widget _buildReflectionCard(BuildContext context, DailyProgressProvider provider) {
+    final reflections = [
+      "Avoided Lying",
+      "Avoided Backbiting",
+      "Lowered Gaze",
+      "Avoided Argument",
+      "Controlled Negative Thoughts"
+    ];
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: _cardDecoration(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text("Daily Reflection", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textDark)),
+          const SizedBox(height: 4),
+          const Text("Self Control & Habits", style: TextStyle(fontSize: 12, color: Colors.grey)),
+          const SizedBox(height: 16),
+          ...reflections.map((r) => _buildReflectionItem(context, r, provider.isReflectionDone(r))).toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReflectionItem(BuildContext context, String name, bool isChecked) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12.0),
+      child: Row(children: [
+        GestureDetector(
+          onTap: () => context.read<DailyProgressProvider>().toggleReflection(name),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200), 
+            width: 24, height: 24, 
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(6), 
+              border: Border.all(color: isChecked ? AppColors.primary : Colors.grey.shade300, width: 2), 
+              color: isChecked ? AppColors.primary : Colors.transparent
+            ), 
+            child: isChecked ? const Icon(Icons.check, size: 16, color: Colors.white) : null
+          ),
+        ),
+        const SizedBox(width: 12),
+        Text(name, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Color(0xFF424242))),
+      ]),
     );
   }
 

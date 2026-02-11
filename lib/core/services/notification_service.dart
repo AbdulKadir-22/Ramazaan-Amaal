@@ -1,8 +1,8 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
-import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
-import 'package:flutter/material.dart'; //
+import 'package:flutter/material.dart'; 
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -14,19 +14,25 @@ class NotificationService {
 
   Future<void> init() async {
     try {
-      tz.initializeTimeZones();
-      String timeZoneName = await FlutterTimezone.getLocalTimezone().then((value) => value.identifier);
+      tz_data.initializeTimeZones();
+      // flutter_timezone 5.0.1 returns a TimezoneInfo object, we need the name/identifier string
+      final timezoneInfo = await FlutterTimezone.getLocalTimezone();
+      String timeZoneName = timezoneInfo.identifier; 
       
-      // Handle legacy timezone names
+      // Handle legacy timezone names if necessary
       if (timeZoneName == 'Asia/Calcutta') {
         timeZoneName = 'Asia/Kolkata';
       }
 
       debugPrint('Timezone detected: $timeZoneName');
-      tz.setLocalLocation(tz.getLocation(timeZoneName));
+      final location = tz.getLocation(timeZoneName);
+      tz.setLocalLocation(location);
     } catch (e) {
       debugPrint('Failed to get local timezone: $e');
-      tz.setLocalLocation(tz.getLocation('UTC'));
+      // Fallback to UTC if timezone detection fails
+      try {
+        tz.setLocalLocation(tz.getLocation('UTC'));
+      } catch (_) {}
     }
 
     const AndroidInitializationSettings initializationSettingsAndroid =
@@ -44,7 +50,12 @@ class NotificationService {
       iOS: initializationSettingsIOS,
     );
 
-    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+    await flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse: (details) {
+        debugPrint('Notification tapped: ${details.payload}');
+      },
+    );
   }
 
   Future<void> requestPermissions() async {
@@ -75,6 +86,8 @@ class NotificationService {
     required String title,
     required String body,
     required TimeOfDay time,
+    String channelId = 'daily_reminders',
+    String channelName = 'Daily Reminders',
   }) async {
     final now = tz.TZDateTime.now(tz.local);
     var scheduledDate = tz.TZDateTime(
@@ -95,11 +108,37 @@ class NotificationService {
       title,
       body,
       scheduledDate,
+      NotificationDetails(
+        android: AndroidNotificationDetails(
+          channelId,
+          channelName,
+          channelDescription: 'Repeating daily reminders',
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+        iOS: const DarwinNotificationDetails(),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      matchDateTimeComponents: DateTimeComponents.time,
+    );
+  }
+
+  Future<void> scheduleTestNotification() async {
+    final now = tz.TZDateTime.now(tz.local);
+    final scheduledDate = now.add(const Duration(seconds: 5));
+
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+      0,
+      '🚀 Test Notification',
+      'If you see this, notifications are working perfectly!',
+      scheduledDate,
       const NotificationDetails(
         android: AndroidNotificationDetails(
-          'daily_zikr_channel',
-          'Daily Zikr Reminders',
-          channelDescription: 'Reminders to perform specific Zikr',
+          'test_channel',
+          'Test Notifications',
+          channelDescription: 'For testing purposes',
           importance: Importance.max,
           priority: Priority.high,
         ),
@@ -108,7 +147,30 @@ class NotificationService {
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time, // Repeats daily at this time
+    );
+  }
+
+  Future<void> showNotification({
+    required int id,
+    required String title,
+    required String body,
+    String channelId = 'immediate_notifications',
+    String channelName = 'Immediate Notifications',
+  }) async {
+    await flutterLocalNotificationsPlugin.show(
+      id,
+      title,
+      body,
+      NotificationDetails(
+        android: AndroidNotificationDetails(
+          channelId,
+          channelName,
+          channelDescription: 'For immediate alerts and announcements',
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+        iOS: const DarwinNotificationDetails(),
+      ),
     );
   }
 

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/prayer_data.dart';
 import '../../home/providers/daily_progress_provider.dart';
+import '../providers/prayer_reminder_provider.dart';
 
 class SalahDetailScreen extends StatefulWidget {
   final String prayerName;
@@ -17,14 +18,42 @@ class _SalahDetailScreenState extends State<SalahDetailScreen> {
   // Local state for checking off individual rakats (optional, not stored persistently for simplicity)
   final Set<int> _checkedItems = {}; 
 
+  Future<void> _pickTime(BuildContext context) async {
+    final provider = context.read<PrayerReminderProvider>();
+    final String? existingTime = provider.getReminderTime(widget.prayerName);
+    
+    TimeOfDay initial = TimeOfDay.now();
+    if (existingTime != null && existingTime.contains(":")) {
+      final parts = existingTime.split(":");
+      initial = TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+    }
+
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: initial,
+    );
+
+    if (picked != null) {
+      provider.setReminder(widget.prayerName, picked);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Reminder set for ${picked.format(context)}")),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Get data structure for this specific prayer
     final List<PrayerUnit> units = PrayerData.prayerStructure[widget.prayerName] ?? [];
     
-    // Watch provider for overall completion status
+    // Watch providers
     final provider = context.watch<DailyProgressProvider>();
+    final reminderProvider = context.watch<PrayerReminderProvider>();
+    
     final bool isCompletedToday = provider.isSalahCompleted(widget.prayerName);
+    final String? reminderTime = reminderProvider.getReminderTime(widget.prayerName);
 
     return Scaffold(
       backgroundColor: AppColors.scaffoldBackground,
@@ -50,20 +79,23 @@ class _SalahDetailScreenState extends State<SalahDetailScreen> {
                       color: AppColors.textDark,
                     ),
                   ),
-                  // "Set time" button (Placeholder functionality)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF3EFFF),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFFD1C4E9)),
-                    ),
-                    child: const Text(
-                      "Set time",
-                      style: TextStyle(
-                        color: Color(0xFF7E57C2),
-                        fontWeight: FontWeight.w600,
-                        fontSize: 12,
+                  // "Set time" button
+                  GestureDetector(
+                    onTap: () => _pickTime(context),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF3EFFF),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: const Color(0xFFD1C4E9)),
+                      ),
+                      child: Text(
+                        reminderTime ?? "Set time",
+                        style: const TextStyle(
+                          color: Color(0xFF7E57C2),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
                   ),

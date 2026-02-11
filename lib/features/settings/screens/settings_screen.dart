@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart'; // Add this to pubspec.yaml if 
 import 'manage_reminders_screen.dart';
 import 'add_past_entry_screen.dart';
 import '../widgets/admin_notification_sheet.dart';
+import '../../../core/services/notification_service.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -46,11 +47,22 @@ class SettingsScreen extends StatelessWidget {
                     _buildSettingsTile(
                       icon: Icons.notifications_active_outlined,
                       title: "Manage Reminders",
-                      showDivider: false,
+                      showDivider: true,
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => const ManageRemindersScreen()),
+                        );
+                      },
+                    ),
+                    _buildSettingsTile(
+                      icon: Icons.bug_report_outlined,
+                      title: "Test Notifications (5s)",
+                      showDivider: false,
+                      onTap: () async {
+                        await NotificationService().scheduleTestNotification();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Test notification will appear in 5 seconds")),
                         );
                       },
                     ),

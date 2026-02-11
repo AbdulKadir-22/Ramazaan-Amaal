@@ -79,9 +79,11 @@ class ZikrProvider extends ChangeNotifier {
         
         await _notificationService.scheduleDailyNotification(
           id: id.hashCode, 
-          title: "Zikr Reminder",
-          body: "It's time for $newName",
+          title: "📿 Zikr Reminder",
+          body: "It's time for your $newName Amaal.",
           time: time,
+          channelId: 'zikr_reminders',
+          channelName: 'Zikr Reminders',
         );
       } else {
         // If reminder was removed, cancel the notification
@@ -113,9 +115,11 @@ class ZikrProvider extends ChangeNotifier {
       
       await _notificationService.scheduleDailyNotification(
         id: id.hashCode, 
-        title: "Zikr Reminder",
-        body: "Time for your ${_zikrList[index]['name']} zikr.",
+        title: "📿 Zikr Reminder",
+        body: "Time for your ${_zikrList[index]['name']} Amaal.",
         time: time,
+        channelId: 'zikr_reminders',
+        channelName: 'Zikr Reminders',
       );
 
       await _saveToHive();

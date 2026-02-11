@@ -7,6 +7,7 @@ import 'core/services/notification_service.dart';
 import 'features/onboarding/providers/user_provider.dart';
 import 'features/home/providers/daily_progress_provider.dart';
 import 'features/tilawat/providers/tilawat_provider.dart';
+import 'features/salah/providers/prayer_reminder_provider.dart';
 import 'features/splash/screens/splash_screen.dart';
 
 void main() async {
@@ -41,6 +42,7 @@ class RamazanTrackerApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => DailyProgressProvider()..loadDailyProgress()),
         ChangeNotifierProvider(create: (_) => ZikrProvider()..loadZikrData()),
         ChangeNotifierProvider(create: (_) => TilawatProvider()..loadTilawatData()),
+        ChangeNotifierProvider(create: (_) => PrayerReminderProvider()..loadTimes()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

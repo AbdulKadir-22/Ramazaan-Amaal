@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/services/notification_service.dart';
 
 // Helper function to show the modal
 void showAdminNotificationModal(BuildContext context) {
@@ -149,14 +150,29 @@ class _AdminNotificationSheetState extends State<AdminNotificationSheet> {
             width: double.infinity,
             height: 54,
             child: ElevatedButton(
-              onPressed: () {
-                // TODO: Integrate Firebase Function here
-                // String title = _titleController.text;
-                // String body = _messageController.text;
-                // sendNotificationToAll(title, body);
+              onPressed: () async {
+                final title = _titleController.text;
+                final body = _messageController.text;
                 
-                print("Broadcasting: ${_titleController.text}"); // Debug print
-                Navigator.pop(context);
+                if (title.isNotEmpty && body.isNotEmpty) {
+                  // Trigger a local notification immediately as a "Broadcast"
+                  await NotificationService().showNotification(
+                    id: DateTime.now().millisecond,
+                    title: title,
+                    body: body,
+                  );
+                  
+                  if (mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Broadcast sent successfully!")),
+                    );
+                  }
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Please enter both title and message")),
+                  );
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF10B981), // Mint Green

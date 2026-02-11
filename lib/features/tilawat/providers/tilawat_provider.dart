@@ -82,13 +82,15 @@ class TilawatProvider extends ChangeNotifier {
     // We use a fixed ID for Tilawat reminder (e.g., 999) to overwrite previous ones
     await _notificationService.scheduleDailyNotification(
       id: 999,
-      title: "Time for Tilawat",
-      body: "Keep going, little steps matter. Read a few pages now.",
+      title: "📖 Time for Tilawat",
+      body: "Keep going! Read a few pages of the Holy Qur'an to stay on track.",
       time: time,
+      channelId: 'tilawat_reminders',
+      channelName: 'Tilawat Reminders',
     );
     
-    // Save preference if needed
-    _box.put('tilawat_reminder_time', '${time.hour}:${time.minute}');
+    // Save preference
+    await _box.put('tilawat_reminder_time', '${time.hour}:${time.minute.toString().padLeft(2, '0')}');
     notifyListeners();
   }
 

@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:ramazaan_tracker/core/services/storage_service.dart';
+import 'package:ramazaan_tracker/features/home/models/daily_record.dart';
+import 'package:provider/provider.dart';
+import 'package:ramazaan_tracker/features/zikr/providers/zikr_provider.dart';
 
 class AddPastEntryScreen extends StatefulWidget {
   const AddPastEntryScreen({super.key});
@@ -8,8 +12,69 @@ class AddPastEntryScreen extends StatefulWidget {
 }
 
 class _AddPastEntryScreenState extends State<AddPastEntryScreen> {
+  final StorageService _storage = StorageService();
   String _selectedType = 'Salah';
-  DateTime _selectedDate = DateTime.now();
+  DateTime _selectedDate = DateTime.now().subtract(const Duration(days: 1));
+  DailyRecord? _record;
+  
+  final TextEditingController _tilawatController = TextEditingController();
+  final Map<String, TextEditingController> _zikrControllers = {};
+
+  @override
+  void initState() {
+    super.initState();
+    // Use addPostFrameCallback to access provider after first build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadRecord();
+    });
+  }
+
+  void _loadRecord() {
+    setState(() {
+      _record = _storage.getDailyRecord(_selectedDate) ?? DailyRecord.empty(_selectedDate);
+      _tilawatController.text = _record!.tilawatPages.toString();
+      
+      // Get user-defined zikrs from provider
+      final zikrProvider = context.read<ZikrProvider>();
+      final userZikrs = zikrProvider.zikrList;
+      
+      // Initialize Zikr controllers
+      _zikrControllers.clear();
+      
+      // First, add all user-defined zikrs
+      for (var z in userZikrs) {
+        final name = z['name'] as String;
+        // If the record has a count for this zikr, use it, otherwise 0
+        final count = _record!.zikr[name] ?? 0;
+        _zikrControllers[name] = TextEditingController(text: count.toString());
+      }
+      
+      // Also add any zikrs that are in the record but NOT in the current userZikrs (legacy data)
+      _record!.zikr.forEach((key, value) {
+        if (!_zikrControllers.containsKey(key)) {
+          _zikrControllers[key] = TextEditingController(text: value.toString());
+        }
+      });
+    });
+  }
+
+  Future<void> _saveRecord() async {
+    if (_record == null) return;
+
+    // Sync values from all controllers
+    _record!.tilawatPages = int.tryParse(_tilawatController.text) ?? 0;
+    _zikrControllers.forEach((key, controller) {
+      _record!.zikr[key] = int.tryParse(controller.text) ?? 0;
+    });
+
+    await _storage.saveDailyRecord(_record!);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Entry saved successfully!"), backgroundColor: Color(0xFF10B981)),
+      );
+      Navigator.pop(context);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,13 +112,17 @@ class _AddPastEntryScreenState extends State<AddPastEntryScreen> {
                   value: _selectedType,
                   isExpanded: true,
                   icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF10B981)),
-                  items: <String>['Salah', 'Tilawat', 'Zikr'].map((String value) {
+                  items: <String>['Salah', 'Tilawat', 'Zikr', 'Roza', 'Reflection'].map((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
                       child: Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
                     );
                   }).toList(),
-                  onChanged: (newValue) => setState(() => _selectedType = newValue!),
+                  onChanged: (newValue) {
+                    setState(() {
+                      _selectedType = newValue!;
+                    });
+                  },
                 ),
               ),
             ),
@@ -76,7 +145,12 @@ class _AddPastEntryScreenState extends State<AddPastEntryScreen> {
                     );
                   },
                 );
-                if (picked != null) setState(() => _selectedDate = picked);
+                if (picked != null) {
+                  setState(() {
+                    _selectedDate = picked;
+                    _loadRecord();
+                  });
+                }
               },
               child: Container(
                 padding: const EdgeInsets.all(16),
@@ -97,26 +171,150 @@ class _AddPastEntryScreenState extends State<AddPastEntryScreen> {
                 ),
               ),
             ),
-            const Spacer(),
+            const SizedBox(height: 32),
+            Expanded(
+              child: _record == null 
+                ? const Center(child: CircularProgressIndicator())
+                : _buildCategoryForm(),
+            ),
+            const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
               height: 55,
               child: ElevatedButton(
-                onPressed: () {
-                  // Handle saving logic
-                  Navigator.pop(context);
-                },
+                onPressed: _saveRecord,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF10B981),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   elevation: 0,
                 ),
-                child: const Text("Continue", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white)),
+                child: const Text("Save Entry", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white)),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildCategoryForm() {
+    switch (_selectedType) {
+      case 'Salah':
+        return _buildSalahForm();
+      case 'Tilawat':
+        return _buildTilawatForm();
+      case 'Zikr':
+        return _buildZikrForm();
+      case 'Roza':
+        return _buildRozaForm();
+      case 'Reflection':
+        return _buildReflectionForm();
+      default:
+        return const Center(child: Text("Select a category to start"));
+    }
+  }
+
+  Widget _buildSalahForm() {
+    final mainPrayers = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha', 'Taraweeh'];
+    final extraPrayers = ['Tahajjud', 'Ishraq', 'Chasht', 'Awwabin'];
+
+    return ListView(
+      children: [
+        const Text("Mandatory & Taraweeh", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+        const SizedBox(height: 8),
+        ...mainPrayers.map((p) => CheckboxListTile(
+          title: Text(p),
+          value: _record!.salah[p] ?? false,
+          activeColor: const Color(0xFF10B981),
+          onChanged: (val) => setState(() => _record!.salah[p] = val!),
+        )),
+        const SizedBox(height: 16),
+        const Text("Nawafil", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+        const SizedBox(height: 8),
+        ...extraPrayers.map((p) => CheckboxListTile(
+          title: Text(p),
+          value: _record!.extraSalah[p] ?? false,
+          activeColor: const Color(0xFF10B981),
+          onChanged: (val) => setState(() => _record!.extraSalah[p] = val!),
+        )),
+      ],
+    );
+  }
+
+  Widget _buildTilawatForm() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text("Pages Read", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+        const SizedBox(height: 12),
+        TextField(
+          controller: _tilawatController,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            hintText: "Enter number of pages",
+            filled: true,
+            fillColor: Colors.white,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildZikrForm() {
+    return ListView(
+      children: _zikrControllers.entries.map((e) => Padding(
+        padding: const EdgeInsets.only(bottom: 16.0),
+        child: Row(
+          children: [
+            Expanded(child: Text(e.key, style: const TextStyle(fontWeight: FontWeight.w600))),
+            SizedBox(
+              width: 100,
+              child: TextField(
+                controller: e.value,
+                keyboardType: TextInputType.number,
+                textAlign: TextAlign.center,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                ),
+              ),
+            ),
+          ],
+        ),
+      )).toList(),
+    );
+  }
+
+  Widget _buildRozaForm() {
+    return Column(
+      children: [
+        SwitchListTile(
+          title: const Text("Roza (Fasted)"),
+          value: _record!.rozaNiyat,
+          activeColor: const Color(0xFF10B981),
+          onChanged: (val) => setState(() => _record!.rozaNiyat = val),
+        ),
+        SwitchListTile(
+          title: const Text("Suhoor Niyat"),
+          value: _record!.suhoorNiyat,
+          activeColor: const Color(0xFF10B981),
+          onChanged: (val) => setState(() => _record!.suhoorNiyat = val),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildReflectionForm() {
+    return ListView(
+      children: _record!.selfReflection.keys.map((habit) => CheckboxListTile(
+        title: Text(habit),
+        value: _record!.selfReflection[habit] ?? false,
+        activeColor: const Color(0xFF10B981),
+        onChanged: (val) => setState(() => _record!.selfReflection[habit] = val!),
+      )).toList(),
     );
   }
 }

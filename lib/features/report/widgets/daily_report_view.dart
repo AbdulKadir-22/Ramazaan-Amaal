@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../home/providers/daily_progress_provider.dart';
-import '../../zikr/providers/zikr_provider.dart'; // Import ZikrProvider
+import '../../zikr/providers/zikr_provider.dart'; 
 import '../../../core/constants/app_colors.dart';
 
 class DailyReportView extends StatefulWidget {
@@ -18,10 +18,8 @@ class _DailyReportViewState extends State<DailyReportView> {
   @override
   void initState() {
     super.initState();
-    // Use read here to avoid rebuild loops in initState, but ideally we should listen to changes if external updates happen
     final provider = context.read<DailyProgressProvider>();
     _notesController = TextEditingController(text: provider.notes ?? "");
-    // Listen for changes to update dirty state
     _notesController.addListener(_checkForChanges);
   }
 
@@ -41,15 +39,8 @@ class _DailyReportViewState extends State<DailyReportView> {
 
   @override
   Widget build(BuildContext context) {
-    // Watch for changes to update UI, but be careful with text field
     final provider = context.watch<DailyProgressProvider>();
     
-    // Update controller text only if it's different to avoid cursor jumping, 
-    // or just rely on local state for text field and only update on submit/blur?
-    // For simplicity, we'll keep local controller for editing and update provider on change.
-    // Use `notes` from provider only if controller is empty initially (handled in initState).
-    
-    // Calculate completion
     final totalSalah = 5;
     var completedSalah = 0;
     if (provider.isSalahCompleted('Fajr')) completedSalah++;
@@ -59,6 +50,14 @@ class _DailyReportViewState extends State<DailyReportView> {
     if (provider.isSalahCompleted('Isha')) completedSalah++;
     
     double completionPercentage = (completedSalah / totalSalah);
+
+    // Calculate Duas completion
+    final totalDuas = 6; 
+    int completedDuas = 0;
+    final duaTitles = ["Dua for Suhoor", "Dua for Iftaar", "1st Ashra Dua", "2nd Ashra Dua", "3rd Ashra Dua", "Laylatul Qadr Dua"];
+    for (var title in duaTitles) {
+      if (provider.isDuaDone(title)) completedDuas++;
+    }
 
     return Column(
       children: [
@@ -71,10 +70,10 @@ class _DailyReportViewState extends State<DailyReportView> {
         Row(
           children: [
              Expanded(child: _buildInfoCard(
-               title: "Suhoor Niyat", 
-               icon: Icons.wb_twilight_rounded, 
-               content: Text(provider.isSuhoorNiyatMade ? "Done" : "Not Done", 
-                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: provider.isSuhoorNiyatMade ? AppColors.primary : Colors.grey))
+               title: "Roza Niyah", 
+               icon: Icons.favorite_rounded, 
+               content: Text(provider.isRozaNiyatDone ? "Done" : "Not Done", 
+                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: provider.isRozaNiyatDone ? AppColors.primary : Colors.grey))
              )),
              const SizedBox(width: 16),
              Expanded(child: _buildInfoCard(
@@ -83,6 +82,20 @@ class _DailyReportViewState extends State<DailyReportView> {
                content: Text("${provider.tilawatPages} Pages", 
                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textDark))
              )),
+          ],
+        ),
+        const SizedBox(height: 16),
+        
+        Row(
+          children: [
+            Expanded(child: _buildInfoCard(
+              title: "Duas", 
+              icon: Icons.volunteer_activism, 
+              content: Text("$completedDuas/$totalDuas", 
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.primary))
+            )),
+            const SizedBox(width: 16),
+            const Spacer(),
           ],
         ),
         const SizedBox(height: 16),

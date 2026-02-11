@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../widgets/daily_report_view.dart';
-import '../widgets/weekly_report_view.dart';
 import '../widgets/monthly_report_view.dart';
 
 class ReportScreen extends StatefulWidget {
@@ -50,8 +49,6 @@ class _ReportScreenState extends State<ReportScreen> {
       case 0:
         return const DailyReportView();
       case 1:
-        return const WeeklyReportView();
-      case 2:
         return const MonthlyReportView();
       default:
         return const DailyReportView();
@@ -64,8 +61,7 @@ class _ReportScreenState extends State<ReportScreen> {
       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(25), border: Border.all(color: Colors.grey.shade200)),
       child: Row(children: [
         _buildTabItem("Daily", 0),
-        _buildTabItem("Weekly", 1),
-        _buildTabItem("Ramadan", 2),
+        _buildTabItem("Ramadan", 1),
       ]),
     );
   }

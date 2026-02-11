@@ -12,6 +12,7 @@ import '../../zikr/screens/tasbeeh_list_screen.dart';
 import '../../zikr/screens/zikr_detail_screen.dart';
 import '../../tilawat/providers/tilawat_provider.dart';
 import '../../tilawat/screens/tilawat_screen.dart';
+import '../../roza/screens/roza_detail_screen.dart';
 
 // --- Import Feature Screens for Navigation ---
 // Make sure these files exist as created in the previous step
@@ -108,8 +109,8 @@ class _HomeContent extends StatelessWidget {
             _buildHeader(),
             const SizedBox(height: 24),
             
-            // 1. Suhoor Card
-            _buildSuhoorCard(context, progressProvider),
+            // 1. Roza Card (Replaces Suhoor Card)
+            _buildRozaCard(context, progressProvider),
             const SizedBox(height: 16),
             
             // 2. Salah Card
@@ -171,28 +172,33 @@ class _HomeContent extends StatelessWidget {
     );
   }
 
-  Widget _buildSuhoorCard(BuildContext context, DailyProgressProvider provider) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-      decoration: _cardDecoration(),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const Text("Suhoor Niyat", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textDark)),
-          GestureDetector(
-            onTap: () => context.read<DailyProgressProvider>().toggleSuhoor(),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: 28, height: 28,
-              decoration: BoxDecoration(
-                color: provider.isSuhoorDone ? AppColors.primary : Colors.transparent,
-                borderRadius: BorderRadius.circular(8),
-                border: provider.isSuhoorDone ? null : Border.all(color: Colors.grey.shade300, width: 2)
-              ),
-              child: provider.isSuhoorDone ? const Icon(Icons.check, size: 18, color: Colors.white) : null,
+  Widget _buildRozaCard(BuildContext context, DailyProgressProvider provider) {
+    return GestureDetector(
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const RozaDetailScreen())),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+        decoration: _cardDecoration(),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Row(
+              children: [
+                Text("Roza", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textDark)),
+                SizedBox(width: 8),
+              ],
             ),
-          ),
-        ],
+            Row(
+              children: [
+                if (provider.isSuhoorDone && provider.isRozaNiyatDone)
+                  const Icon(Icons.check_circle, color: AppColors.primary, size: 20)
+                else if (provider.isSuhoorDone || provider.isRozaNiyatDone)
+                  const Text("In Progress", style: TextStyle(fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.w600)),
+                const SizedBox(width: 8),
+                const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

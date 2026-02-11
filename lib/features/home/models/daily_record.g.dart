@@ -20,9 +20,11 @@ class DailyRecordAdapter extends TypeAdapter<DailyRecord> {
       date: fields[0] as DateTime,
       salah: (fields[1] as Map).cast<String, bool>(),
       extraSalah: (fields[2] as Map).cast<String, bool>(),
-      suhoorNiyat: fields[3] as bool,
-      tilawatPages: fields[4] as int,
+      suhoorNiyat: (fields[3] as bool?) ?? false,
+      rozaNiyat: (fields[8] as bool?) ?? false,
+      tilawatPages: (fields[4] as int?) ?? 0,
       selfReflection: (fields[6] as Map?)?.cast<String, bool>(),
+      duas: (fields[9] as Map?)?.cast<String, bool>(),
       notes: fields[7] as String?,
     );
   }
@@ -30,7 +32,7 @@ class DailyRecordAdapter extends TypeAdapter<DailyRecord> {
   @override
   void write(BinaryWriter writer, DailyRecord obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.date)
       ..writeByte(1)
@@ -44,7 +46,11 @@ class DailyRecordAdapter extends TypeAdapter<DailyRecord> {
       ..writeByte(6)
       ..write(obj.selfReflection)
       ..writeByte(7)
-      ..write(obj.notes);
+      ..write(obj.notes)
+      ..writeByte(8)
+      ..write(obj.rozaNiyat)
+      ..writeByte(9)
+      ..write(obj.duas);
   }
 
   @override

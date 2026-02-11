@@ -13,6 +13,7 @@ class MonthlyReportView extends StatefulWidget {
 
 class _MonthlyReportViewState extends State<MonthlyReportView> {
   late Future<List<DailyRecord?>> _monthlyDataFuture;
+  final StorageService _storage = StorageService();
 
   @override
   void initState() {
@@ -21,15 +22,12 @@ class _MonthlyReportViewState extends State<MonthlyReportView> {
   }
 
   Future<List<DailyRecord?>> _fetchMonthlyData() async {
-    final storage = StorageService();
-    // Fetch current month's data. For simplicity, let's just fetch last 30 days.
-    // Or strictly "This Month" (e.g. March). 
-    // Let's do last 30 days for rolling report which is often more useful.
+    // Fetch last 30 days
     final now = DateTime.now();
     List<DailyRecord?> records = [];
     for (int i = 29; i >= 0; i--) {
       final date = now.subtract(Duration(days: i));
-      records.add(storage.getDailyRecord(date));
+      records.add(_storage.getDailyRecord(date));
     }
     return records;
   }
@@ -39,13 +37,48 @@ class _MonthlyReportViewState extends State<MonthlyReportView> {
     return FutureBuilder<List<DailyRecord?>>(
       future: _monthlyDataFuture,
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 40),
+              child: CircularProgressIndicator(color: AppColors.primary),
+            ),
+          );
         }
 
-        final records = snapshot.data!;
-        // Sort newest first for the list
-        final reversedRecords = records.reversed.toList();
+        if (snapshot.hasError) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 40),
+              child: Column(
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.red, size: 48),
+                  const SizedBox(height: 16),
+                  Text("Error loading data: ${snapshot.error}", textAlign: TextAlign.center),
+                ],
+              ),
+            ),
+          );
+        }
+
+        final records = snapshot.data ?? [];
+        if (records.every((r) => r == null)) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 60),
+              child: Column(
+                children: [
+                  Icon(Icons.calendar_today_outlined, color: Colors.grey, size: 48),
+                  SizedBox(height: 16),
+                  Text("No records found for this month yet.", style: TextStyle(color: Colors.grey)),
+                ],
+              ),
+            ),
+          );
+        }
+
+        // Sort newest first
+        final reversedRecords = records.reversed.where((r) => r != null).toList();
         
         return Column(
           children: [
@@ -59,7 +92,10 @@ class _MonthlyReportViewState extends State<MonthlyReportView> {
   }
 
   Widget _buildSummaryStats(List<DailyRecord?> records) {
-    int totalSalahPossible = records.length * 5;
+    int validRecordsCount = records.where((r) => r != null).length;
+    if (validRecordsCount == 0) return const SizedBox.shrink();
+
+    int totalSalahPossible = validRecordsCount * 5;
     int totalFajr = 0, totalDhuhr = 0, totalAsr = 0, totalMaghrib = 0, totalIsha = 0;
     
     for (var r in records) {
@@ -78,22 +114,30 @@ class _MonthlyReportViewState extends State<MonthlyReportView> {
         : "0";
 
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))]),
       child: Column(
         children: [
           Text("$percentage%", style: const TextStyle(fontSize: 40, fontWeight: FontWeight.w800, color: AppColors.primary)),
-          const Text("Monthly Salah Consistency", style: TextStyle(fontSize: 14, color: Colors.grey)),
+          const Text("Salah Consistency (Active Days)", style: TextStyle(fontSize: 13, color: Colors.grey)),
           const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildStatItem("Fajr", totalFajr),
-              _buildStatItem("Dhuhr", totalDhuhr),
-              _buildStatItem("Asr", totalAsr),
-              _buildStatItem("Maghrib", totalMaghrib),
-              _buildStatItem("Isha", totalIsha),
-            ],
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildStatItem("Fajr", totalFajr),
+                const SizedBox(width: 16),
+                _buildStatItem("Dhuhr", totalDhuhr),
+                const SizedBox(width: 16),
+                _buildStatItem("Asr", totalAsr),
+                const SizedBox(width: 16),
+                _buildStatItem("Maghrib", totalMaghrib),
+                const SizedBox(width: 16),
+                _buildStatItem("Isha", totalIsha),
+              ],
+            ),
           ),
         ],
       ),
@@ -103,55 +147,79 @@ class _MonthlyReportViewState extends State<MonthlyReportView> {
   Widget _buildStatItem(String label, int count) {
     return Column(
       children: [
-        Text(count.toString(), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        Text(count.toString(), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textDark)),
         const SizedBox(height: 4),
-        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+        Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey)),
       ],
     );
   }
 
   Widget _buildHistoryList(List<DailyRecord?> reversedRecords) {
-    return ListView.builder(
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      itemCount: reversedRecords.length,
-      itemBuilder: (context, index) {
-        final record = reversedRecords[index];
+    return Column(
+      children: reversedRecords.map((record) {
         if (record == null) return const SizedBox.shrink();
         
-        int completed = 0;
-        if (record.salah['Fajr'] == true) completed++;
-        if (record.salah['Dhuhr'] == true) completed++;
-        if (record.salah['Asr'] == true) completed++;
-        if (record.salah['Maghrib'] == true) completed++;
-        if (record.salah['Isha'] == true) completed++;
+        int completedSalah = 0;
+        if (record.salah['Fajr'] == true) completedSalah++;
+        if (record.salah['Dhuhr'] == true) completedSalah++;
+        if (record.salah['Asr'] == true) completedSalah++;
+        if (record.salah['Maghrib'] == true) completedSalah++;
+        if (record.salah['Isha'] == true) completedSalah++;
 
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade100)),
+          decoration: BoxDecoration(
+            color: Colors.white, 
+            borderRadius: BorderRadius.circular(16), 
+            border: Border.all(color: Colors.grey.shade100),
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.01), blurRadius: 5, offset: const Offset(0, 2))]
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(DateFormat('EEEE, d MMMM').format(record.date), style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.textDark)),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(color: completed == 5 ? AppColors.accent.withOpacity(0.2) : Colors.grey.shade100, borderRadius: BorderRadius.circular(8)),
-                    child: Text("$completed/5", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: completed == 5 ? AppColors.primary : Colors.grey)),
+                  Text(
+                    DateFormat('EEEE, d MMM').format(record.date), 
+                    style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.textDark)
+                  ),
+                  Row(
+                    children: [
+                      if (record.rozaNiyat) 
+                        const Padding(
+                          padding: EdgeInsets.only(right: 8.0),
+                          child: Icon(Icons.favorite, size: 14, color: Colors.redAccent),
+                        ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: completedSalah == 5 ? AppColors.accent.withOpacity(0.2) : Colors.grey.shade100, 
+                          borderRadius: BorderRadius.circular(8)
+                        ),
+                        child: Text(
+                          "$completedSalah/5 Salah", 
+                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: completedSalah == 5 ? AppColors.primary : Colors.grey)
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
               if (record.notes != null && record.notes!.isNotEmpty) ...[
                 const SizedBox(height: 8),
-                Text(record.notes!, style: const TextStyle(fontSize: 13, color: Colors.grey, fontStyle: FontStyle.italic)),
+                Text(
+                  record.notes!, 
+                  style: const TextStyle(fontSize: 13, color: Colors.grey, fontStyle: FontStyle.italic),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ]
             ],
           ),
         );
-      },
+      }).toList(),
     );
   }
 }

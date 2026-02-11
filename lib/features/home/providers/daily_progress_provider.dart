@@ -27,6 +27,23 @@ class DailyProgressProvider extends ChangeNotifier {
     _saveProgress();
   }
 
+  // --- Roza Nibat ---
+  bool get isRozaNiyatDone => _todayRecord.rozaNiyat;
+
+  void toggleRozaNiyat() {
+    _todayRecord.rozaNiyat = !_todayRecord.rozaNiyat;
+    _saveProgress();
+  }
+
+  // --- Duas ---
+  bool isDuaDone(String name) => _todayRecord.duas[name] ?? false;
+
+  void toggleDua(String name) {
+    bool current = isDuaDone(name);
+    _todayRecord.duas[name] = !current;
+    _saveProgress();
+  }
+
   // --- Extra Salah (Tahajjud, Ishraq, etc.) ---
   bool isExtraSalahDone(String name) => _todayRecord.extraSalah[name] ?? false;
 
@@ -63,6 +80,8 @@ class DailyProgressProvider extends ChangeNotifier {
       salah: _todayRecord.salah,
       extraSalah: _todayRecord.extraSalah,
       suhoorNiyat: _todayRecord.suhoorNiyat,
+      rozaNiyat: _todayRecord.rozaNiyat,
+      duas: _todayRecord.duas,
       tilawatPages: _todayRecord.tilawatPages,
       selfReflection: _todayRecord.selfReflection,
       notes: note,
@@ -79,6 +98,8 @@ class DailyProgressProvider extends ChangeNotifier {
       salah: _todayRecord.salah,
       extraSalah: _todayRecord.extraSalah,
       suhoorNiyat: _todayRecord.suhoorNiyat,
+      rozaNiyat: _todayRecord.rozaNiyat,
+      duas: _todayRecord.duas,
       tilawatPages: _todayRecord.tilawatPages + pages,
       selfReflection: _todayRecord.selfReflection,
       notes: _todayRecord.notes,

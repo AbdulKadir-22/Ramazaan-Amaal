@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:hijri/hijri_calendar.dart';
 import '../widgets/daily_report_view.dart';
 import '../widgets/monthly_report_view.dart';
 
@@ -61,7 +63,7 @@ class _ReportScreenState extends State<ReportScreen> {
       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(25), border: Border.all(color: Colors.grey.shade200)),
       child: Row(children: [
         _buildTabItem("Daily", 0),
-        _buildTabItem("Ramadan", 1),
+        _buildTabItem(HijriCalendar.now().hMonth == 9 ? "Ramadan" : "Monthly", 1),
       ]),
     );
   }

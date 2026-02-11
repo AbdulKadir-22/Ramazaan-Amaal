@@ -31,6 +31,9 @@ class DailyRecord extends HiveObject {
   @HiveField(9)
   final Map<String, bool> duas;
 
+  @HiveField(10)
+  final Map<String, int> zikr;
+
   DailyRecord({
     required this.date,
     required this.salah,
@@ -40,6 +43,7 @@ class DailyRecord extends HiveObject {
     this.tilawatPages = 0,
     Map<String, bool>? selfReflection,
     Map<String, bool>? duas,
+    Map<String, int>? zikr,
     this.notes,
   }) : selfReflection = selfReflection ?? {
           'Avoided Lying': false,
@@ -48,7 +52,8 @@ class DailyRecord extends HiveObject {
           'Avoided Argument': false,
           'Controlled Negative Thoughts': false,
         },
-        duas = duas ?? {};
+        duas = duas ?? {},
+        zikr = zikr ?? {};
 
   // Factory to create an empty record for a formatted date string
   factory DailyRecord.empty(DateTime date) {
@@ -78,6 +83,7 @@ class DailyRecord extends HiveObject {
       notes: null,
       rozaNiyat: false,
       duas: {},
+      zikr: {},
     );
   }
 }

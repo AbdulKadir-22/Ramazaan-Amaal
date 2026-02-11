@@ -70,6 +70,16 @@ class DailyProgressProvider extends ChangeNotifier {
     _saveProgress();
   }
 
+  // --- Zikr sync ---
+  void syncZikr(List<Map<String, dynamic>> zikrs) {
+    for (var z in zikrs) {
+      final name = z['name'] as String;
+      final count = z['currentCount'] as int;
+      _todayRecord.zikr[name] = count;
+    }
+    _saveProgress();
+  }
+
   // --- Notes ---
   String? get notes => _todayRecord.notes;
 
@@ -82,6 +92,7 @@ class DailyProgressProvider extends ChangeNotifier {
       suhoorNiyat: _todayRecord.suhoorNiyat,
       rozaNiyat: _todayRecord.rozaNiyat,
       duas: _todayRecord.duas,
+      zikr: _todayRecord.zikr,
       tilawatPages: _todayRecord.tilawatPages,
       selfReflection: _todayRecord.selfReflection,
       notes: note,
@@ -100,6 +111,7 @@ class DailyProgressProvider extends ChangeNotifier {
       suhoorNiyat: _todayRecord.suhoorNiyat,
       rozaNiyat: _todayRecord.rozaNiyat,
       duas: _todayRecord.duas,
+      zikr: _todayRecord.zikr,
       tilawatPages: _todayRecord.tilawatPages + pages,
       selfReflection: _todayRecord.selfReflection,
       notes: _todayRecord.notes,

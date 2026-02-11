@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../../home/providers/daily_progress_provider.dart';
 import '../../zikr/providers/zikr_provider.dart'; 
 import '../../../core/constants/app_colors.dart';
+import '../../../core/utils/share_util.dart';
+import 'package:screenshot/screenshot.dart';
 
 class DailyReportView extends StatefulWidget {
   const DailyReportView({super.key});
@@ -59,9 +61,19 @@ class _DailyReportViewState extends State<DailyReportView> {
       if (provider.isDuaDone(title)) completedDuas++;
     }
 
-    return Column(
-      children: [
-        _buildCircularProgress(completionPercentage),
+    // Sync Zikr to DailyRecord for historical tracking
+    final zikrProvider = context.read<ZikrProvider>();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      provider.syncZikr(zikrProvider.zikrList);
+    });
+
+    return Screenshot(
+      controller: ShareUtil.screenshotController,
+      child: Container(
+        color: const Color(0xFFFDFAF6), // Match scaffold background
+        child: Column(
+          children: [
+            _buildCircularProgress(completionPercentage),
         const SizedBox(height: 16),
         Text("Today: ${(completionPercentage * 100).toInt()}% Salah Complete", 
           style: const TextStyle(color: Colors.grey, fontSize: 14, fontWeight: FontWeight.w500)),
@@ -116,7 +128,7 @@ class _DailyReportViewState extends State<DailyReportView> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(24),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))]
+            boxShadow: [BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 4))]
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -172,8 +184,38 @@ class _DailyReportViewState extends State<DailyReportView> {
           ),
         ),
         const SizedBox(height: 30),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: () {
+              final text = "My Islamic Daily Progress:\n"
+                           "- Salah: ${(completionPercentage * 100).toInt()}%\n"
+                           "- Roza Niyah: ${provider.isRozaNiyatDone ? 'Done' : 'Not Done'}\n"
+                           "- Tilawat: ${provider.tilawatPages} Pages\n"
+                           "Shared via Ramaz Amaal Tracker";
+              
+              ShareUtil.shareWidget(
+                context: context,
+                widget: widget, // Captures entire widget
+                text: text,
+              );
+            },
+            icon: const Icon(Icons.share, size: 18),
+            label: const Text("Share My Progress"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              elevation: 0,
+            ),
+          ),
+        ),
+        const SizedBox(height: 30),
       ],
-    );
+    ),
+  ),
+);
   }
 
   Widget _buildCircularProgress(double value) {
@@ -198,7 +240,7 @@ class _DailyReportViewState extends State<DailyReportView> {
     return Container(
       height: 100,
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))]),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24), boxShadow: [BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 4))]),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey)), Icon(icon, size: 18, color: AppColors.primary)]),
         content,
@@ -223,7 +265,7 @@ class _DailyReportViewState extends State<DailyReportView> {
 
     return Container(
        padding: const EdgeInsets.all(20),
-       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))]),
+       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24), boxShadow: [BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 4))]),
        child: Column(
          crossAxisAlignment: CrossAxisAlignment.start,
          children: [
@@ -277,7 +319,7 @@ class _DailyReportViewState extends State<DailyReportView> {
 
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))]),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24), boxShadow: [BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 4))]),
       child: Column(children: [
         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: const [Text("Zikr & Duas", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textDark)), Icon(Icons.pie_chart_outline, size: 18, color: Colors.grey)]),
         const SizedBox(height: 20),
@@ -287,7 +329,7 @@ class _DailyReportViewState extends State<DailyReportView> {
            ...activeZikrs.map((z) => Padding(
              padding: const EdgeInsets.only(bottom: 12.0),
              child: _buildZikrProgress(z['name'], "Target: ${z['targetCount']}", z['currentCount'], z['targetCount']),
-           )).toList(),
+           )),
       ]),
     );
   }

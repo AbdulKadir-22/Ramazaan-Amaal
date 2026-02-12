@@ -45,12 +45,18 @@ class ApiService {
     try {
       final response = await http.post(
         Uri.parse(ApiConstants.sendNotification),
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-key': ApiConstants.adminKey,
+        },
         body: jsonEncode({
           "title": title,
           "message": message,
         }),
       );
+
+      debugPrint('DEBUG: Send Notification Status: ${response.statusCode}');
+      debugPrint('DEBUG: Send Notification Response: ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return jsonDecode(response.body);

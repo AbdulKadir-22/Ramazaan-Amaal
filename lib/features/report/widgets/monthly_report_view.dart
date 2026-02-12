@@ -1,6 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:hijri/hijri_calendar.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../home/models/daily_record.dart';
 import '../../../core/services/storage_service.dart';
 import '../../../core/constants/app_colors.dart';
@@ -126,7 +129,24 @@ class _MonthlyReportViewState extends State<MonthlyReportView> {
                  "Salah Consistency: ${data['salahCounts']['Fajr']}/${data['daysTracked']} Fajr, etc.\n"
                  "Tracked with Ramaz Amaal Tracker.";
     
-    ShareUtil.shareText(text);
+    try {
+      final uint8list = await ShareUtil.screenshotController.capture();
+      if (uint8list != null) {
+        final directory = await getTemporaryDirectory();
+        final imagePath = await File('${directory.path}/monthly_report_${DateTime.now().millisecondsSinceEpoch}.png').create();
+        await imagePath.writeAsBytes(uint8list);
+
+        await Share.shareXFiles(
+          [XFile(imagePath.path)],
+          text: text,
+        );
+      } else {
+        await ShareUtil.shareText(text);
+      }
+    } catch (e) {
+      debugPrint('Error sharing monthly report: $e');
+      await ShareUtil.shareText(text);
+    }
   }
 
   @override
@@ -179,35 +199,41 @@ class _MonthlyReportViewState extends State<MonthlyReportView> {
 
         final records = List<DailyRecord>.from(data['records']);
         
-        return Column(
-          children: [
-            _buildMainSummary(data),
-            const SizedBox(height: 20),
-            _buildDetailedStats(data),
-            const SizedBox(height: 20),
-            _buildZikrSummary(data['zikrTotals']),
-            const SizedBox(height: 20),
-            _buildHabitSummary(data['habitCounts'], data['daysTracked']),
-            const SizedBox(height: 20),
-            _buildNotesFeed(data['allNotes']),
-            const SizedBox(height: 30),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () => _shareReport(data),
-                icon: const Icon(Icons.share, size: 18),
-                label: Text("Share My ${HijriCalendar.now().hMonth == 9 ? 'Ramadan' : 'Monthly'} Journey"),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 0,
+        return Screenshot(
+          controller: ShareUtil.screenshotController,
+          child: Container(
+            color: const Color(0xFFFDFAF6), // Match scaffold background
+            child: Column(
+              children: [
+                _buildMainSummary(data),
+                const SizedBox(height: 20),
+                _buildDetailedStats(data),
+                const SizedBox(height: 20),
+                _buildZikrSummary(data['zikrTotals']),
+                const SizedBox(height: 20),
+                _buildHabitSummary(data['habitCounts'], data['daysTracked']),
+                const SizedBox(height: 20),
+                _buildNotesFeed(data['allNotes']),
+                const SizedBox(height: 30),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () => _shareReport(data),
+                    icon: const Icon(Icons.share, size: 18),
+                    label: Text("Share My ${HijriCalendar.now().hMonth == 9 ? 'Ramadan' : 'Monthly'} Journey"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      elevation: 0,
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 20),
+              ],
             ),
-            const SizedBox(height: 20),
-          ],
+          ),
         );
       },
     );

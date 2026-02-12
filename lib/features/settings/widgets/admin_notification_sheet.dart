@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/services/notification_service.dart';
+import '../../../core/services/api_service.dart';
 
 // Helper function to show the modal
 void showAdminNotificationModal(BuildContext context) {
@@ -22,11 +23,13 @@ class _AdminNotificationSheetState extends State<AdminNotificationSheet> {
   // Controllers to capture text for Firebase later
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _messageController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   @override
   void dispose() {
     _titleController.dispose();
     _messageController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
@@ -143,6 +146,37 @@ class _AdminNotificationSheetState extends State<AdminNotificationSheet> {
             ),
           ),
 
+          const SizedBox(height: 20),
+
+          // 5. Password Input
+          const Text(
+            "Admin Password",
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF1A1F1D),
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _passwordController,
+            obscureText: true,
+            decoration: InputDecoration(
+              hintText: "Enter admin password",
+              hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              prefixIcon: const Icon(Icons.lock_outline, size: 18, color: Colors.grey),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: Color(0xFF10B981)), 
+              ),
+            ),
+          ),
+
           const SizedBox(height: 32),
 
           // 5. Send Broadcast Button
@@ -153,24 +187,39 @@ class _AdminNotificationSheetState extends State<AdminNotificationSheet> {
               onPressed: () async {
                 final title = _titleController.text;
                 final body = _messageController.text;
+                final password = _passwordController.text;
                 
-                if (title.isNotEmpty && body.isNotEmpty) {
-                  // Trigger a local notification immediately as a "Broadcast"
-                  await NotificationService().showNotification(
-                    id: DateTime.now().millisecond,
-                    title: title,
-                    body: body,
-                  );
-                  
-                  if (mounted) {
-                    Navigator.pop(context);
+                if (title.isNotEmpty && body.isNotEmpty && password.isNotEmpty) {
+                  // Basic Frontend Password Check
+                  if (password == "admin786") {
+                    try {
+                      // Trigger backend broadcast
+                      await ApiService().sendBroadcastNotification(
+                        title: title,
+                        message: body,
+                      );
+                      
+                      if (mounted) {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Broadcast sent successfully to all users!")),
+                        );
+                      }
+                    } catch (e) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Failed to send broadcast: $e")),
+                        );
+                      }
+                    }
+                  } else {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Broadcast sent successfully!")),
+                      const SnackBar(content: Text("Incorrect admin password. Access denied.")),
                     );
                   }
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Please enter both title and message")),
+                    const SnackBar(content: Text("Please fill in all fields")),
                   );
                 }
               },

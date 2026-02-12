@@ -247,7 +247,7 @@ class _HomeContent extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: _cardDecoration(),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [const Text("Nawafil", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textDark)), TextButton(onPressed: () {}, child: const Text("Add more", style: TextStyle(color: Color(0xFF6C63FF), fontWeight: FontWeight.w500)))]),
+        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [const Text("Nawafil", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textDark))]),
         const SizedBox(height: 16),
         _buildExtraSalahItem(context, "Tahajjud", provider.isExtraSalahDone("Tahajjud")), const SizedBox(height: 14),
         _buildExtraSalahItem(context, "Ishraq", provider.isExtraSalahDone("Ishraq")), const SizedBox(height: 14),
@@ -363,7 +363,7 @@ class _HomeContent extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         decoration: _cardDecoration(),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: const [Text("Zikr", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textDark)), Text("Total / Expected", style: TextStyle(color: Colors.grey, fontSize: 12))]),
+          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: const [Text("Zikr", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textDark))]),
           const SizedBox(height: 16),
           if (zikrList.isEmpty) Center(child: TextButton.icon(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const TasbeehListScreen())), icon: const Icon(Icons.add, color: AppColors.primary), label: const Text("Start your first Zikr", style: TextStyle(color: AppColors.primary))))
           else ListView.separated(physics: const NeverScrollableScrollPhysics(), shrinkWrap: true, itemCount: zikrList.length > 3 ? 3 : zikrList.length, separatorBuilder: (context, index) => const SizedBox(height: 12), itemBuilder: (context, index) => _buildDynamicZikrItem(context, zikrList[index])),

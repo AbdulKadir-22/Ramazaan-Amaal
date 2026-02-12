@@ -47,17 +47,6 @@ class SettingsScreen extends StatelessWidget {
                     _buildSettingsTile(
                       icon: Icons.notifications_active_outlined,
                       title: "Manage Reminders",
-                      showDivider: true,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const ManageRemindersScreen()),
-                        );
-                      },
-                    ),
-                    _buildSettingsTile(
-                      icon: Icons.notifications_none_outlined,
-                      title: "Manage Reminders",
                       showDivider: false,
                       onTap: () {
                         Navigator.push(
@@ -85,10 +74,7 @@ class SettingsScreen extends StatelessWidget {
                       icon: Icons.explore_outlined,
                       title: "Our Journey",
                       showDivider: false,
-                      onTap: () {
-                        // Placeholder for "Our Journey" modal
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Coming Soon!")));
-                      },
+                      onTap: () => _showJourneyModal(context),
                     ),
                   ],
                 ),
@@ -226,6 +212,80 @@ class SettingsScreen extends StatelessWidget {
   }
 
   BoxDecoration _cardDecoration() {
-    return BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.015), blurRadius: 10, offset: const Offset(0, 4))]);
+    return BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(20),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.015),
+          blurRadius: 10,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    );
+  }
+
+  void _showJourneyModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+        ),
+        padding: const EdgeInsets.all(24),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2)))),
+              const SizedBox(height: 24),
+              const Text(
+                "Our Journey",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1A1F1D)),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                "Assalamu Alaikum! Welcome to Tarteeb.\n\n"
+                "This project started with a simple vision: to create a digital companion that helps the Ummah stay consistent with their daily Amaal, especially during the blessed month of Ramadan.\n\n"
+                "Our journey has been one of learning and dedication. Every feature, from the Tasbeeh counter to the daily progress reports, has been designed with the goal of making spiritual growth easier and more accessible for everyone.\n\n"
+                "We are constantly evolving and plan to add more features that will support your journey towards a better version of yourself. Thank you for being a part of our story.\n\n"
+                "May Allah (SWT) accept our efforts and keep us steadfast. Ameen.",
+                style: TextStyle(color: Color(0xFF1A1F1D), height: 1.6, fontSize: 15),
+              ),
+              const SizedBox(height: 24),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0FDF4),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFFDCFCE7)),
+                ),
+                child: Row(
+                  children: const [
+                    Icon(Icons.auto_awesome, color: Color(0xFF10B981), size: 20),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        "More updates coming soon, In Sha Allah!",
+                        style: TextStyle(
+                          color: Color(0xFF15803D),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 30),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

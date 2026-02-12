@@ -1,5 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../home/providers/daily_progress_provider.dart';
 import '../../zikr/providers/zikr_provider.dart'; 
 import '../../../core/constants/app_colors.dart';
@@ -187,18 +190,31 @@ class _DailyReportViewState extends State<DailyReportView> {
         SizedBox(
           width: double.infinity,
           child: ElevatedButton.icon(
-            onPressed: () {
+            onPressed: () async {
               final text = "My Islamic Daily Progress:\n"
                            "- Salah: ${(completionPercentage * 100).toInt()}%\n"
                            "- Roza Niyah: ${provider.isRozaNiyatDone ? 'Done' : 'Not Done'}\n"
                            "- Tilawat: ${provider.tilawatPages} Pages\n"
                            "Shared via Ramaz Amaal Tracker";
               
-              ShareUtil.shareWidget(
-                context: context,
-                widget: widget, // Captures entire widget
-                text: text,
-              );
+              try {
+                final uint8list = await ShareUtil.screenshotController.capture();
+                if (uint8list != null) {
+                  final directory = await getTemporaryDirectory();
+                  final imagePath = await File('${directory.path}/daily_report_${DateTime.now().millisecondsSinceEpoch}.png').create();
+                  await imagePath.writeAsBytes(uint8list);
+
+                  await Share.shareXFiles(
+                    [XFile(imagePath.path)],
+                    text: text,
+                  );
+                } else {
+                  await ShareUtil.shareText(text);
+                }
+              } catch (e) {
+                debugPrint('Error sharing report: $e');
+                await ShareUtil.shareText(text);
+              }
             },
             icon: const Icon(Icons.share, size: 18),
             label: const Text("Share My Progress"),

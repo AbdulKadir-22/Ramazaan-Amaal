@@ -12,7 +12,7 @@ class DuaScreen extends StatelessWidget {
 
     final List<Map<String, dynamic>> duas = [
       {
-        'title': "Dua for Suhoor",
+        'title': "Dua of Suhoor",
         'subtitle': "Recited before dawn",
         'icon': Icons.wb_sunny_outlined,
         'iconColor': const Color(0xFF00BCD4),
@@ -21,7 +21,7 @@ class DuaScreen extends StatelessWidget {
         'translation': "I intend to keep the fast for tomorrow in the month of Ramadan.",
       },
       {
-        'title': "Dua for Iftaar",
+        'title': "Dua of Iftaar",
         'subtitle': "Recited at sunset",
         'icon': Icons.nightlight_round,
         'iconColor': const Color(0xFF10B981),

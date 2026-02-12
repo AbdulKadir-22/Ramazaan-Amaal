@@ -3,6 +3,18 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter/material.dart'; 
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'api_service.dart';
+import '../services/storage_service.dart';
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // If you're going to use other Firebase services in the background, such as Firestore,
+  // make sure you call `initializeApp` before using other Firebase services.
+  await Firebase.initializeApp();
+  debugPrint("Handling a background message: ${message.messageId}");
+}
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -72,6 +84,68 @@ class NotificationService {
         debugPrint('Notification tapped: ${details.payload}');
       },
     );
+
+    // Initialize Firebase and FCM
+    await _initFirebase();
+  }
+
+  Future<void> _initFirebase() async {
+    try {
+      // In a real app, you'd need the google-services.json/GoogleService-Info.plist properly set up
+      await Firebase.initializeApp();
+      
+      FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+      // Request FCM permissions (mostly for iOS)
+      await messaging.requestPermission(
+        alert: true,
+        announcement: false,
+        badge: true,
+        carPlay: false,
+        criticalAlert: false,
+        provisional: false,
+        sound: true,
+      );
+
+      // Get FCM Token
+      debugPrint('DEBUG: Waiting a moment for Firebase services to warm up...');
+      await Future.delayed(const Duration(seconds: 2));
+      
+      debugPrint('DEBUG: Attempting to get FCM Token...');
+      String? token = await messaging.getToken();
+      debugPrint('DEBUG: FCM Token retrieved: ${token != null ? "YES" : "NO"}');
+      if (token != null) debugPrint('DEBUG: Token: $token');
+
+      if (token != null) {
+        final storage = StorageService();
+        final name = storage.getUserName() ?? "Unknown User";
+        debugPrint('DEBUG: Registering device for user: $name');
+        
+        // Register token with backend
+        await ApiService().registerDevice(name: name, token: token);
+        debugPrint('DEBUG: Device registered successfully with backend');
+      } else {
+        debugPrint('DEBUG: Token is null, skipping registration');
+      }
+
+      // Handle Foreground Messages
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        debugPrint('Got a message whilst in the foreground!');
+        if (message.notification != null) {
+          showNotification(
+            id: DateTime.now().millisecond,
+            title: message.notification!.title ?? 'Notification',
+            body: message.notification!.body ?? '',
+          );
+        }
+      });
+
+      // Handle Background/Terminated Messages
+      FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+      
+    } catch (e) {
+      debugPrint('DEBUG: Firebase/FCM error: $e. (This is expected if Firebase is not fully configured yet)');
+    }
   }
 
   Future<Map<String, String>> getInternalInfo() async {

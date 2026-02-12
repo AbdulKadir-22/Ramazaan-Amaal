@@ -27,9 +27,7 @@ class _ReportScreenState extends State<ReportScreen> {
           "Report",
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.w700, fontSize: 18),
         ),
-        actions: [
-          IconButton(icon: const Icon(Icons.ios_share, size: 22, color: Colors.black), onPressed: () {}),
-        ],
+        actions: const [],
       ),
       body: SafeArea(
         child: SingleChildScrollView(

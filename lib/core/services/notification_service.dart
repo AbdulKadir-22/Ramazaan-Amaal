@@ -12,24 +12,40 @@ class NotificationService {
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
+  // Notification IDs
+  static const int ID_DAILY_REPORT = 1000;
+  static const int ID_TILAWAT = 999;
+  static const int ID_FAJR = 101;
+  static const int ID_DHUHR = 102;
+  static const int ID_ASR = 103;
+  static const int ID_MAGHRIB = 104;
+  static const int ID_ISHA = 105;
+  static const int ID_TARAWEEH = 106;
+
   Future<void> init() async {
     try {
       tz_data.initializeTimeZones();
-      // flutter_timezone 5.0.1 returns a TimezoneInfo object, we need the name/identifier string
       final timezoneInfo = await FlutterTimezone.getLocalTimezone();
-      String timeZoneName = timezoneInfo.identifier; 
+      String timeZoneName = timezoneInfo.identifier;
       
-      // Handle legacy timezone names if necessary
-      if (timeZoneName == 'Asia/Calcutta') {
-        timeZoneName = 'Asia/Kolkata';
+      debugPrint('DEBUG: Detected Timezone Identifier: $timeZoneName');
+      
+      try {
+        tz.setLocalLocation(tz.getLocation(timeZoneName));
+      } catch (e) {
+        // More aggressive fallback for India specifically as it's a common fail point
+        if (timeZoneName == 'Asia/Calcutta' || timeZoneName.contains('India')) {
+          tz.setLocalLocation(tz.getLocation('Asia/Kolkata'));
+        } else if (timeZoneName.contains('Karachi')) {
+          tz.setLocalLocation(tz.getLocation('Asia/Karachi'));
+        } else {
+          debugPrint('DEBUG: Falling back to UTC due to: $e');
+          tz.setLocalLocation(tz.getLocation('UTC'));
+        }
       }
-
-      debugPrint('Timezone detected: $timeZoneName');
-      final location = tz.getLocation(timeZoneName);
-      tz.setLocalLocation(location);
+      debugPrint('DEBUG: Effective Timezone: ${tz.local.name}');
     } catch (e) {
-      debugPrint('Failed to get local timezone: $e');
-      // Fallback to UTC if timezone detection fails
+      debugPrint('DEBUG: Fatal Timezone Error: $e');
       try {
         tz.setLocalLocation(tz.getLocation('UTC'));
       } catch (_) {}
@@ -58,17 +74,25 @@ class NotificationService {
     );
   }
 
+  Future<Map<String, String>> getInternalInfo() async {
+    return {
+      'timezone_plugin': await FlutterTimezone.getLocalTimezone().then((v) => v.identifier).catchError((e) => 'Error: $e'),
+      'tz_local_name': tz.local.name,
+      'system_now': DateTime.now().toString(),
+      'tz_now': tz.TZDateTime.now(tz.local).toString(),
+    };
+  }
+
   Future<void> requestPermissions() async {
-    // Android 13+ requires explicit permission
-    await flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.requestNotificationsPermission();
-      
-     await flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.requestExactAlarmsPermission();
+    // Android 13+ requires explicit notification permission
+    final androidPlugin = flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+    
+    if (androidPlugin != null) {
+      await androidPlugin.requestNotificationsPermission();
+      // This is the crucial one for Android 12+. Guide user if it fails.
+      await androidPlugin.requestExactAlarmsPermission();
+    }
 
     // iOS permissions
     await flutterLocalNotificationsPlugin
@@ -86,22 +110,30 @@ class NotificationService {
     required String title,
     required String body,
     required TimeOfDay time,
-    String channelId = 'daily_reminders',
-    String channelName = 'Daily Reminders',
+    String channelId = 'ramazan_reminders_v1',
+    String channelName = 'Reminders',
   }) async {
-    final now = tz.TZDateTime.now(tz.local);
-    var scheduledDate = tz.TZDateTime(
-      tz.local,
-      now.year,
-      now.month,
-      now.day,
+    // 1. Get current system time (most reliable reference)
+    final systemNow = DateTime.now();
+    
+    // 2. Build the target date/time for TODAY using system components
+    DateTime targetDateTime = DateTime(
+      systemNow.year,
+      systemNow.month,
+      systemNow.day,
       time.hour,
       time.minute,
     );
 
-    if (scheduledDate.isBefore(now)) {
-      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    // 3. If target is in the past, move it to tomorrow
+    if (targetDateTime.isBefore(systemNow)) {
+      targetDateTime = targetDateTime.add(const Duration(days: 1));
     }
+
+    // 4. Convert to TZDateTime for the plugin
+    final scheduledDate = tz.TZDateTime.from(targetDateTime, tz.local);
+
+    debugPrint('DEBUG: Scheduling $title for $scheduledDate (System: $targetDateTime)');
 
     await flutterLocalNotificationsPlugin.zonedSchedule(
       id,
@@ -112,11 +144,18 @@ class NotificationService {
         android: AndroidNotificationDetails(
           channelId,
           channelName,
-          channelDescription: 'Repeating daily reminders',
           importance: Importance.max,
           priority: Priority.high,
+          styleInformation: BigTextStyleInformation(body),
+          // Ensure it can wake the device
+          fullScreenIntent: false,
+          category: AndroidNotificationCategory.reminder,
         ),
-        iOS: const DarwinNotificationDetails(),
+        iOS: const DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        ),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
@@ -125,26 +164,65 @@ class NotificationService {
     );
   }
 
+  Future<void> scheduleDailyReportNotification() async {
+    await scheduleDailyNotification(
+      id: ID_DAILY_REPORT,
+      title: "📊 Your Daily Report is Here",
+      body: "Check your progress before you sleep! How was your day today?",
+      time: const TimeOfDay(hour: 22, minute: 0),
+      channelId: 'daily_report_reminders',
+      channelName: 'Daily Report Reminders',
+    );
+  }
+
+  /// Schedules a test notification using a completely different strategy
   Future<void> scheduleTestNotification() async {
-    final now = tz.TZDateTime.now(tz.local);
-    final scheduledDate = now.add(const Duration(seconds: 5));
+    final systemNow = DateTime.now();
+    final targetDateTime = systemNow.add(const Duration(seconds: 5));
+    final scheduledDate = tz.TZDateTime.from(targetDateTime, tz.local);
+
+    debugPrint('DEBUG: Simple 5s Test for $scheduledDate');
 
     await flutterLocalNotificationsPlugin.zonedSchedule(
-      0,
-      '🚀 Test Notification',
-      'If you see this, notifications are working perfectly!',
+      999,
+      '🎯 Quick Test (5s)',
+      'Scheduled via Time-Bridging strategy.',
       scheduledDate,
       const NotificationDetails(
         android: AndroidNotificationDetails(
-          'test_channel',
-          'Test Notifications',
-          channelDescription: 'For testing purposes',
+          'test_channel_v2',
+          'Test Channel',
           importance: Importance.max,
           priority: Priority.high,
         ),
         iOS: DarwinNotificationDetails(),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+    );
+  }
+
+  Future<void> scheduleTestInexactNotification() async {
+    final systemNow = DateTime.now();
+    final targetDateTime = systemNow.add(const Duration(seconds: 10));
+    final scheduledDate = tz.TZDateTime.from(targetDateTime, tz.local);
+
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+      888,
+      '🧪 Inexact Test (10s)',
+      'This avoids strict system rules.',
+      scheduledDate,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'test_channel_v2',
+          'Test Channel',
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+        iOS: DarwinNotificationDetails(),
+      ),
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
     );
@@ -165,7 +243,6 @@ class NotificationService {
         android: AndroidNotificationDetails(
           channelId,
           channelName,
-          channelDescription: 'For immediate alerts and announcements',
           importance: Importance.max,
           priority: Priority.high,
         ),

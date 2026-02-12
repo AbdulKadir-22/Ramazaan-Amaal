@@ -77,14 +77,16 @@ class ZikrProvider extends ChangeNotifier {
         final parts = newReminder.split(':');
         final time = TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
         
-        await _notificationService.scheduleDailyNotification(
-          id: id.hashCode, 
-          title: "📿 Zikr Reminder",
-          body: "It's time for your $newName Amaal.",
-          time: time,
-          channelId: 'zikr_reminders',
-          channelName: 'Zikr Reminders',
-        );
+        if (_box.get('zikr_enabled', defaultValue: true)) {
+          await _notificationService.scheduleDailyNotification(
+            id: id.hashCode, 
+            title: "📿 Zikr Reminder",
+            body: "It's time for your $newName Amaal.",
+            time: time,
+            channelId: 'zikr_reminders',
+            channelName: 'Zikr Reminders',
+          );
+        }
       } else {
         // If reminder was removed, cancel the notification
         await _notificationService.cancelNotification(id.hashCode);
@@ -113,14 +115,16 @@ class ZikrProvider extends ChangeNotifier {
       final timeString = '${time.hour}:${time.minute.toString().padLeft(2, '0')}';
       _zikrList[index]['reminderTime'] = timeString;
       
-      await _notificationService.scheduleDailyNotification(
-        id: id.hashCode, 
-        title: "📿 Zikr Reminder",
-        body: "Time for your ${_zikrList[index]['name']} Amaal.",
-        time: time,
-        channelId: 'zikr_reminders',
-        channelName: 'Zikr Reminders',
-      );
+      if (_box.get('zikr_enabled', defaultValue: true)) {
+        await _notificationService.scheduleDailyNotification(
+          id: id.hashCode, 
+          title: "📿 Zikr Reminder",
+          body: "Time for your ${_zikrList[index]['name']} Amaal.",
+          time: time,
+          channelId: 'zikr_reminders',
+          channelName: 'Zikr Reminders',
+        );
+      }
 
       await _saveToHive();
       notifyListeners();

@@ -56,13 +56,13 @@ class SettingsScreen extends StatelessWidget {
                       },
                     ),
                     _buildSettingsTile(
-                      icon: Icons.bug_report_outlined,
-                      title: "Test Notifications (5s)",
+                      icon: Icons.notifications_none_outlined,
+                      title: "Manage Reminders",
                       showDivider: false,
-                      onTap: () async {
-                        await NotificationService().scheduleTestNotification();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Test notification will appear in 5 seconds")),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const ManageRemindersScreen()),
                         );
                       },
                     ),

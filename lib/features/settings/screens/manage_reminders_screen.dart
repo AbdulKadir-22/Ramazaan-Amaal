@@ -1,21 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../../core/providers/notification_settings_provider.dart';
 
-class ManageRemindersScreen extends StatefulWidget {
+class ManageRemindersScreen extends StatelessWidget {
   const ManageRemindersScreen({super.key});
 
   @override
-  State<ManageRemindersScreen> createState() => _ManageRemindersScreenState();
-}
-
-class _ManageRemindersScreenState extends State<ManageRemindersScreen> {
-  // Example state variables
-  bool _salahNotifications = true;
-  bool _morningAdhkar = true;
-  bool _eveningAdhkar = true;
-  bool _fridayReminder = false;
-
-  @override
   Widget build(BuildContext context) {
+    final settings = Provider.of<NotificationSettingsProvider>(context);
+
     return Scaffold(
       backgroundColor: const Color(0xFFFDFAF6),
       appBar: AppBar(
@@ -36,31 +29,31 @@ class _ManageRemindersScreenState extends State<ManageRemindersScreen> {
         child: Column(
           children: [
             _buildReminderCard(
+              title: "Daily Report",
+              subtitle: "Remind me at 10 PM to check my progress",
+              value: settings.dailyReportEnabled,
+              onChanged: (v) => settings.setDailyReportEnabled(v),
+            ),
+            const SizedBox(height: 16),
+            _buildReminderCard(
               title: "Prayer Times",
               subtitle: "Get notified for each Salah time",
-              value: _salahNotifications,
-              onChanged: (v) => setState(() => _salahNotifications = v),
+              value: settings.salahEnabled,
+              onChanged: (v) => settings.setSalahEnabled(v),
             ),
             const SizedBox(height: 16),
             _buildReminderCard(
-              title: "Morning Adhkar",
-              subtitle: "Reminder after Fajr",
-              value: _morningAdhkar,
-              onChanged: (v) => setState(() => _morningAdhkar = v),
+              title: "Tilawat Reminder",
+              subtitle: "Encouragement to read Qur'an",
+              value: settings.tilawatEnabled,
+              onChanged: (v) => settings.setTilawatEnabled(v),
             ),
             const SizedBox(height: 16),
             _buildReminderCard(
-              title: "Evening Adhkar",
-              subtitle: "Reminder after Asr",
-              value: _eveningAdhkar,
-              onChanged: (v) => setState(() => _eveningAdhkar = v),
-            ),
-            const SizedBox(height: 16),
-            _buildReminderCard(
-              title: "Surah Al-Kahf",
-              subtitle: "Weekly reminder on Fridays",
-              value: _fridayReminder,
-              onChanged: (v) => setState(() => _fridayReminder = v),
+              title: "Zikr Reminder",
+              subtitle: "Master switch for all Zikr reminders",
+              value: settings.zikrEnabled,
+              onChanged: (v) => settings.setZikrEnabled(v),
             ),
           ],
         ),

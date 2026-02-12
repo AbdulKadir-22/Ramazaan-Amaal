@@ -27,22 +27,24 @@ class PrayerReminderProvider extends ChangeNotifier {
     await _box.put('prayer_reminder_times', _prayerTimes);
 
     final idMap = {
-      'Fajr': 101,
-      'Dhuhr': 102,
-      'Asr': 103,
-      'Maghrib': 104,
-      'Isha': 105,
-      'Taraweeh': 106,
+      'Fajr': NotificationService.ID_FAJR,
+      'Dhuhr': NotificationService.ID_DHUHR,
+      'Asr': NotificationService.ID_ASR,
+      'Maghrib': NotificationService.ID_MAGHRIB,
+      'Isha': NotificationService.ID_ISHA,
+      'Taraweeh': NotificationService.ID_TARAWEEH,
     };
 
-    await _notificationService.scheduleDailyNotification(
-      id: idMap[prayerName] ?? prayerName.hashCode,
-      title: "Prayer Reminder: $prayerName",
-      body: "It's time for $prayerName prayer. Don't forget to record it!",
-      time: time,
-      channelId: 'prayer_reminders',
-      channelName: 'Prayer Reminders',
-    );
+    if (_box.get('salah_enabled', defaultValue: true)) {
+      await _notificationService.scheduleDailyNotification(
+        id: idMap[prayerName] ?? prayerName.hashCode,
+        title: "Prayer Reminder: $prayerName",
+        body: "It's time for $prayerName prayer. Don't forget to record it!",
+        time: time,
+        channelId: 'prayer_reminders',
+        channelName: 'Prayer Reminders',
+      );
+    }
 
     notifyListeners();
   }
@@ -52,12 +54,12 @@ class PrayerReminderProvider extends ChangeNotifier {
     await _box.put('prayer_reminder_times', _prayerTimes);
 
     final idMap = {
-      'Fajr': 101,
-      'Dhuhr': 102,
-      'Asr': 103,
-      'Maghrib': 104,
-      'Isha': 105,
-      'Taraweeh': 106,
+      'Fajr': NotificationService.ID_FAJR,
+      'Dhuhr': NotificationService.ID_DHUHR,
+      'Asr': NotificationService.ID_ASR,
+      'Maghrib': NotificationService.ID_MAGHRIB,
+      'Isha': NotificationService.ID_ISHA,
+      'Taraweeh': NotificationService.ID_TARAWEEH,
     };
 
     await _notificationService.cancelNotification(idMap[prayerName] ?? prayerName.hashCode);

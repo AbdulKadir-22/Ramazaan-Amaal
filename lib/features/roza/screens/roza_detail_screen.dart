@@ -85,7 +85,7 @@ class RozaDetailScreen extends StatelessWidget {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            "Wa bisawmi ghadin nawaiytu min shahri ramadan",
+                            "Allah Pak ki Razamandi Haasil Karna, Islam ka aham fareeza ada karna, Roze ke Fazaeel haasil karna ",
                             style: TextStyle(
                               fontSize: 14,
                               fontStyle: FontStyle.italic,

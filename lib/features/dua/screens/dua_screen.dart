@@ -31,7 +31,7 @@ class DuaScreen extends StatelessWidget {
       },
       {
         'title': "1st Ashra Dua",
-        'subtitle': "Dua for Mercy (Days 1-10)",
+        'subtitle': "Dua of Mercy (Days 1-10)",
         'icon': Icons.favorite_border,
         'iconColor': Colors.pink,
         'bgColor': const Color(0xFFFCE4EC),
@@ -40,7 +40,7 @@ class DuaScreen extends StatelessWidget {
       },
       {
         'title': "2nd Ashra Dua",
-        'subtitle': "Dua for Forgiveness (Days 11-20)",
+        'subtitle': "Dua of Forgiveness (Days 11-20)",
         'icon': Icons.clean_hands,
         'iconColor': Colors.amber,
         'bgColor': const Color(0xFFFFF8E1),
@@ -49,7 +49,7 @@ class DuaScreen extends StatelessWidget {
       },
       {
         'title': "3rd Ashra Dua",
-        'subtitle': "Dua for Safety from Hell (Days 21-30)",
+        'subtitle': "Dua of Safety from Hell (Days 21-30)",
         'icon': Icons.shield_outlined,
         'iconColor': Colors.deepOrange,
         'bgColor': const Color(0xFFFBE9E7),

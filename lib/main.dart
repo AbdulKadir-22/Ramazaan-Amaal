@@ -9,7 +9,8 @@ import 'features/home/providers/daily_progress_provider.dart';
 import 'features/tilawat/providers/tilawat_provider.dart';
 import 'features/salah/providers/prayer_reminder_provider.dart';
 import 'core/providers/notification_settings_provider.dart';
-import 'features/splash/screens/splash_screen.dart';
+import 'features/home/screens/home_screen.dart';
+import 'features/onboarding/screens/name_screen.dart';
 
 void main() async {
   // Ensure Flutter bindings are initialized before Hive
@@ -57,7 +58,15 @@ class RamazanTrackerApp extends StatelessWidget {
             surface: AppColors.scaffoldBackground,
           ),
         ),
-        home: const SplashScreen(),
+        home: Consumer<UserProvider>(
+          builder: (context, userProvider, _) {
+            if (userProvider.isUserLoggedIn) {
+              return const HomeScreen();
+            } else {
+              return const NameScreen();
+            }
+          },
+        ),
       ),
     );
   }

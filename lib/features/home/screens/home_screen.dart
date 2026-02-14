@@ -310,11 +310,11 @@ class _HomeContent extends StatelessWidget {
 
   Widget _buildReflectionCard(BuildContext context, DailyProgressProvider provider) {
     final reflections = [
-      "Avoided Lying",
-      "Avoided Backbiting",
-      "Lowered Gaze",
-      "Avoided Argument",
-      "Controlled Negative Thoughts"
+      "Avoided Lying(Jhut)",
+      "Avoided Backbiting(Geebat)",
+      "Lowered Gaze(Bad Nazri)",
+      "Avoided Argument(Jhada)",
+      "Negative Thoughts(Buri Soch)"
     ];
 
     return Container(

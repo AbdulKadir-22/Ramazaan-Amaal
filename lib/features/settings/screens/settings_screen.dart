@@ -76,6 +76,12 @@ class SettingsScreen extends StatelessWidget {
                       showDivider: false,
                       onTap: () => _showJourneyModal(context),
                     ),
+                    _buildSettingsTile(
+                      icon: Icons.privacy_tip_outlined,
+                      title: "Privacy Policy",
+                      showDivider: false,
+                      onTap: () => _launchURL("https://ramzaan.abdulkadir.in/"),
+                    ),
                   ],
                 ),
               ),
@@ -114,7 +120,7 @@ class SettingsScreen extends StatelessWidget {
                   SizedBox(height: 8),
                   Text("جزاك الله خيرا", style: TextStyle(color: Color(0xFF1A1F1D), fontSize: 16, fontFamily: 'Arial', fontWeight: FontWeight.w600)),
                   SizedBox(height: 8),
-                  Text("v1.0.0 (Build 482)", style: TextStyle(color: Color(0xFFBDBDBD), fontSize: 10)),
+                  Text("v1.0.0", style: TextStyle(color: Color(0xFFBDBDBD), fontSize: 10)),
                 ]),
               ),
               const SizedBox(height: 20),
@@ -129,64 +135,126 @@ class SettingsScreen extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       builder: (context) => Container(
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
         ),
         padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2)))),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                const CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Color(0xFFE8F5E9),
-                  child: Icon(Icons.person, color: Color(0xFF10B981), size: 30),
-                ),
-                const SizedBox(width: 16),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text("Abdulkadir", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    Text("Lead Developer", style: TextStyle(color: Colors.grey)),
-                  ],
-                )
-              ],
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              "Assalamu Alaikum! I'm a Flutter developer passionate about building tools that benefit the Ummah. Tarteeb is a passion project designed to help us organize our spiritual obligations.",
-              style: TextStyle(color: Color(0xFF1A1F1D), height: 1.5),
-            ),
-            const SizedBox(height: 24),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFDFAF6),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFE8F5E9)),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                  child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(2)))),
+              const SizedBox(height: 24),
+              const Text("Meet the Team",
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              _buildDeveloperProfile(
+                name: "Abdulkadir",
+                role: "Lead Developer",
+                bio: "I'm flutter and MERN stack developer who is passionate about building tools that benefit Ummah",
+                githubId: "@Abdulkadir-22",
+                githubUrl: "https://github.com/Abdulkadir-22",
               ),
-              child: Row(
-                children: const [
-                  Icon(Icons.code, color: Color(0xFF10B981)),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: Text("Sponsor on GitHub", style: TextStyle(fontWeight: FontWeight.w600)),
-                  ),
-                  Text("@Abdulkadir", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)), 
-                ],
+              const Divider(height: 32),
+              _buildDeveloperProfile(
+                name: "Ruksana Bhamji",
+                role: "Database Engineer",
+                bio: "I'm an aspiring database engineer who is working on projects like this to build robust data architectures for the community.",
+                githubId: "@RukshanaBhamji",
+                githubUrl: "https://github.com/RukshanaBhamji",
               ),
-            ),
-            const SizedBox(height: 30),
-          ],
+              // const Divider(height: 32),
+              // _buildDeveloperProfile(
+              //   name: "Third Member",
+              //   role: "UI/UX Designer",
+              //   bio: "I am a UI/UX designer who wants to create UI which is easy to understand for everyone",
+              //   githubId: "@alfisha-28",
+              //   githubUrl: "https://github.com/alfisha-28",
+              // ),
+              const SizedBox(height: 30),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  Widget _buildDeveloperProfile({
+    required String name,
+    required String role,
+    required String bio,
+    required String githubId,
+    required String githubUrl,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const CircleAvatar(
+              radius: 25,
+              backgroundColor: Color(0xFFE8F5E9),
+              child: Icon(Icons.person, color: Color(0xFF10B981), size: 25),
+            ),
+            const SizedBox(width: 16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(name,
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.bold)),
+                Text(role,
+                    style: const TextStyle(color: Colors.grey, fontSize: 13)),
+              ],
+            )
+          ],
+        ),
+        const SizedBox(height: 12),
+        Text(
+          bio,
+          style: const TextStyle(color: Color(0xFF1A1F1D), height: 1.4, fontSize: 14),
+        ),
+        const SizedBox(height: 12),
+        InkWell(
+          onTap: () => _launchURL(githubUrl),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFDFAF6),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: const Color(0xFFE8F5E9)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.code, color: Color(0xFF10B981), size: 18),
+                const SizedBox(width: 8),
+                const Text("GitHub", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                const SizedBox(width: 8),
+                Text(githubId, style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 12)),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _launchURL(String url) async {
+    final Uri uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      throw Exception('Could not launch $url');
+    }
   }
 
   Widget _buildSectionHeader(String title) {

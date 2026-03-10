@@ -52,10 +52,18 @@ android {
     }
 
     buildTypes {
+        getByName("debug") {
+            // Using same ID as release to match google-services.json
+            resValue("string", "app_name", "Ramzaan Tracker")
+        }
         release {
+            // This sets the name for the release app
+            resValue("string", "app_name", "Ramzaan Tracker")
+            
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("release")
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
 }

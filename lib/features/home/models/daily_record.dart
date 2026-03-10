@@ -1,4 +1,5 @@
 import 'package:hive/hive.dart';
+import '../../../core/constants/app_constants.dart';
 
 part 'daily_record.g.dart';
 
@@ -46,11 +47,11 @@ class DailyRecord extends HiveObject {
     Map<String, int>? zikr,
     this.notes,
   }) : selfReflection = selfReflection ?? {
-          'Avoided Lying': false,
-          'Avoided Backbiting': false,
-          'Lowered Gaze': false,
-          'Avoided Argument': false,
-          'Controlled Negative Thoughts': false,
+          AppConstants.reflectionLying: false,
+          AppConstants.reflectionBackbiting: false,
+          AppConstants.reflectionGaze: false,
+          AppConstants.reflectionArgument: false,
+          AppConstants.reflectionNegativeThoughts: false,
         },
         duas = duas ?? {},
         zikr = zikr ?? {};
@@ -74,11 +75,11 @@ class DailyRecord extends HiveObject {
         'Awwabin': false,
       },
       selfReflection: {
-        'Avoided Lying': false,
-        'Avoided Backbiting': false,
-        'Lowered Gaze': false,
-        'Avoided Argument': false,
-        'Controlled Negative Thoughts': false,
+        AppConstants.reflectionLying: false,
+        AppConstants.reflectionBackbiting: false,
+        AppConstants.reflectionGaze: false,
+        AppConstants.reflectionArgument: false,
+        AppConstants.reflectionNegativeThoughts: false,
       },
       notes: null,
       rozaNiyat: false,

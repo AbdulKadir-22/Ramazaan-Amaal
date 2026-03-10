@@ -43,3 +43,12 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+android/key.properties
+android/app/*.jks
+android/app/*.keystore
+
+# Secret constants
+lib/core/constants/app_constants.dart
+
+google-services.json

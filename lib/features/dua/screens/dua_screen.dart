@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart'; 
+import '../../../core/constants/app_constants.dart';
 import '../../home/providers/daily_progress_provider.dart';
 
 class DuaScreen extends StatelessWidget {
@@ -12,7 +13,7 @@ class DuaScreen extends StatelessWidget {
 
     final List<Map<String, dynamic>> duas = [
       {
-        'title': "Dua of Suhoor",
+        'title': AppConstants.duaSuhoor,
         'subtitle': "Recited before dawn",
         'icon': Icons.wb_sunny_outlined,
         'iconColor': const Color(0xFF00BCD4),
@@ -21,7 +22,7 @@ class DuaScreen extends StatelessWidget {
         'translation': "I intend to keep the fast for tomorrow in the month of Ramadan.",
       },
       {
-        'title': "Dua of Iftaar",
+        'title': AppConstants.duaIftaar,
         'subtitle': "Recited at sunset",
         'icon': Icons.nightlight_round,
         'iconColor': const Color(0xFF10B981),
@@ -30,7 +31,7 @@ class DuaScreen extends StatelessWidget {
         'translation': "O Allah! I fasted for You and I believe in You and I put my trust in You and I break my fast with Your sustenance.",
       },
       {
-        'title': "1st Ashra Dua",
+        'title': AppConstants.dua1stAshra,
         'subtitle': "Dua of Mercy (Days 1-10)",
         'icon': Icons.favorite_border,
         'iconColor': Colors.pink,
@@ -39,7 +40,7 @@ class DuaScreen extends StatelessWidget {
         'translation': "O my Lord! Forgive and have mercy, for You are the best of those who show mercy.",
       },
       {
-        'title': "2nd Ashra Dua",
+        'title': AppConstants.dua2ndAshra,
         'subtitle': "Dua of Forgiveness (Days 11-20)",
         'icon': Icons.clean_hands,
         'iconColor': Colors.amber,
@@ -48,7 +49,7 @@ class DuaScreen extends StatelessWidget {
         'translation': "I seek forgiveness from Allah, my Lord, from every sin I committed.",
       },
       {
-        'title': "3rd Ashra Dua",
+        'title': AppConstants.dua3rdAshra,
         'subtitle': "Dua of Safety from Hell (Days 21-30)",
         'icon': Icons.shield_outlined,
         'iconColor': Colors.deepOrange,
@@ -57,7 +58,7 @@ class DuaScreen extends StatelessWidget {
         'translation': "O Allah! Save me from the fire of Hell.",
       },
       {
-        'title': "Laylatul Qadr Dua",
+        'title': AppConstants.duaLaylatulQadr,
         'subtitle': "Recited in the last 10 nights",
         'icon': Icons.star_outline,
         'iconColor': Colors.indigo,

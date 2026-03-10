@@ -7,6 +7,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../home/models/daily_record.dart';
 import '../../../core/services/storage_service.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/share_util.dart';
 import 'package:screenshot/screenshot.dart';
 
@@ -69,11 +70,7 @@ class _MonthlyReportViewState extends State<MonthlyReportView> {
     
     // Reflection/Habits
     Map<String, int> habitCounts = {
-      'Avoided Lying': 0,
-      'Avoided Backbiting': 0,
-      'Lowered Gaze': 0,
-      'Avoided Argument': 0,
-      'Controlled Negative Thoughts': 0,
+      for (var key in AppConstants.reflectionKeys) key: 0,
     };
     
     // Zikr

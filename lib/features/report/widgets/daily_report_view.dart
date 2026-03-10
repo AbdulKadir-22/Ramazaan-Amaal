@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../home/providers/daily_progress_provider.dart';
 import '../../zikr/providers/zikr_provider.dart'; 
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/share_util.dart';
 import 'package:screenshot/screenshot.dart';
 
@@ -57,10 +58,9 @@ class _DailyReportViewState extends State<DailyReportView> {
     double completionPercentage = (completedSalah / totalSalah);
 
     // Calculate Duas completion
-    final totalDuas = 6; 
+    final totalDuas = AppConstants.duaTitles.length; 
     int completedDuas = 0;
-    final duaTitles = ["Dua for Suhoor", "Dua for Iftaar", "1st Ashra Dua", "2nd Ashra Dua", "3rd Ashra Dua", "Laylatul Qadr Dua"];
-    for (var title in duaTitles) {
+    for (var title in AppConstants.duaTitles) {
       if (provider.isDuaDone(title)) completedDuas++;
     }
 
@@ -265,14 +265,8 @@ class _DailyReportViewState extends State<DailyReportView> {
   }
 
   Widget _buildReflectionCard(DailyProgressProvider provider) {
-    // List of reflection keys from DailyRecord
-    final reflectionKeys = [
-      'Avoided Lying',
-      'Avoided Backbiting',
-      'Lowered Gaze',
-      'Avoided Argument',
-      'Controlled Negative Thoughts'
-    ];
+    // List of reflection keys from AppConstants
+    final reflectionKeys = AppConstants.reflectionKeys;
 
     int completed = 0;
     for (var key in reflectionKeys) {

@@ -2,7 +2,7 @@ name: ramazaan_tracker
 description: A Ramazaan Amaal and Ibaadah tracker to maintain daily consistency.
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: ^3.11.0-296.3.beta

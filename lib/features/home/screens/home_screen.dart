@@ -19,6 +19,7 @@ import '../../roza/screens/roza_detail_screen.dart';
 import '../../dua/screens/dua_screen.dart';
 import '../../report/screens/report_screen.dart';
 import '../../settings/screens/settings_screen.dart';
+import '../../../core/constants/app_constants.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -310,11 +311,11 @@ class _HomeContent extends StatelessWidget {
 
   Widget _buildReflectionCard(BuildContext context, DailyProgressProvider provider) {
     final reflections = [
-      "Avoided Lying(Jhut)",
-      "Avoided Backbiting(Geebat)",
-      "Lowered Gaze(Bad Nazri)",
-      "Avoided Argument(Jhada)",
-      "Negative Thoughts(Buri Soch)"
+      {'key': AppConstants.reflectionLying, 'label': "Avoided Lying(Jhut)"},
+      {'key': AppConstants.reflectionBackbiting, 'label': "Avoided Backbiting(Geebat)"},
+      {'key': AppConstants.reflectionGaze, 'label': "Lowered Gaze(Bad Nazri)"},
+      {'key': AppConstants.reflectionArgument, 'label': "Avoided Argument(Jhada)"},
+      {'key': AppConstants.reflectionNegativeThoughts, 'label': "Negative Thoughts(Buri Soch)"},
     ];
 
     return Container(
@@ -327,18 +328,18 @@ class _HomeContent extends StatelessWidget {
           const SizedBox(height: 4),
           const Text("Self Control & Habits", style: TextStyle(fontSize: 12, color: Colors.grey)),
           const SizedBox(height: 16),
-          ...reflections.map((r) => _buildReflectionItem(context, r, provider.isReflectionDone(r))).toList(),
+          ...reflections.map((r) => _buildReflectionItem(context, r['key']!, r['label']!, provider.isReflectionDone(r['key']!))).toList(),
         ],
       ),
     );
   }
 
-  Widget _buildReflectionItem(BuildContext context, String name, bool isChecked) {
+  Widget _buildReflectionItem(BuildContext context, String key, String label, bool isChecked) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: Row(children: [
         GestureDetector(
-          onTap: () => context.read<DailyProgressProvider>().toggleReflection(name),
+          onTap: () => context.read<DailyProgressProvider>().toggleReflection(key),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200), 
             width: 24, height: 24, 
@@ -351,7 +352,7 @@ class _HomeContent extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 12),
-        Text(name, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Color(0xFF424242))),
+        Text(label, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Color(0xFF424242))),
       ]),
     );
   }

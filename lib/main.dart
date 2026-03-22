@@ -31,11 +31,11 @@ void main() async {
     // In a real app, you might want to show an error screen here
   }
 
-  runApp(const RamazanTrackerApp());
+  runApp(const AmaalTrackerApp());
 }
 
-class RamazanTrackerApp extends StatelessWidget {
-  const RamazanTrackerApp({super.key});
+class AmaalTrackerApp extends StatelessWidget {
+  const AmaalTrackerApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +53,7 @@ class RamazanTrackerApp extends StatelessWidget {
 
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'Ramazan Amaal Tracker',
+        title: 'Amaal Tracker',
         theme: ThemeData(
           useMaterial3: true,
           scaffoldBackgroundColor: AppColors.scaffoldBackground,

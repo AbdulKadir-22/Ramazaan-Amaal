@@ -53,6 +53,14 @@ class DailyProgressProvider extends ChangeNotifier {
     _saveProgress();
   }
 
+  int calculateExtraSalahDone() {
+    int count = 0;
+    _todayRecord.extraSalah.forEach((_, value) {
+      if (value) count++;
+    });
+    return count;
+  }
+
   // --- Main Salah ---
   bool isSalahCompleted(String name) => _todayRecord.salah[name] ?? false;
 

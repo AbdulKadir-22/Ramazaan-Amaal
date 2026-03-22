@@ -317,7 +317,7 @@ class SettingsScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               const Text(
-                "Assalamu Alaikum! Welcome to Tarteeb.\n\n"
+                "Assalamu Alaikum! Welcome to Amaal Tracker.\n\n"
                 "This project started with a simple vision: to create a digital companion that helps the Ummah stay consistent with their daily Amaal, especially during the blessed month of Ramadan.\n\n"
                 "Our journey has been one of learning and dedication. Every feature, from the Tasbeeh counter to the daily progress reports, has been designed with the goal of making spiritual growth easier and more accessible for everyone.\n\n"
                 "We are constantly evolving and plan to add more features that will support your journey towards a better version of yourself. Thank you for being a part of our story.\n\n"

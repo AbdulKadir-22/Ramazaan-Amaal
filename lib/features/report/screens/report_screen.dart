@@ -61,7 +61,7 @@ class _ReportScreenState extends State<ReportScreen> {
       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(25), border: Border.all(color: Colors.grey.shade200)),
       child: Row(children: [
         _buildTabItem("Daily", 0),
-        _buildTabItem(HijriCalendar.now().hMonth == 9 ? "Ramadan" : "Monthly", 1),
+        _buildTabItem("Monthly", 1),
       ]),
     );
   }

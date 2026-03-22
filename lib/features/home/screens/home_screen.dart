@@ -103,38 +103,50 @@ class _HomeContent extends StatelessWidget {
 
     return SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
+        // padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0), // Padding moved to children
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(),
-            const SizedBox(height: 24),
-            
-            // 1. Roza Card (Replaces Suhoor Card)
-            // _buildRozaCard(context, progressProvider),
-            const SizedBox(height: 16),
-            
-            // 2. Salah Card
-            _buildSalahCard(context),
-            const SizedBox(height: 16),
-            
-            // 3. Extra Namaz Card
-            _buildExtraNamazCard(context, progressProvider),
-            const SizedBox(height: 16),
-            
-            // 4. Tilawat Card
-            _buildTilawatCard(context, tilawatProvider),
-            const SizedBox(height: 16),
-            
-            // 5. Daily Reflection Card
-            _buildReflectionCard(context, progressProvider),
-            const SizedBox(height: 16),
+            _buildHeader(context),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 24),
+                  
+                  // 1. Roza Card (Commented out for post-Ramzan)
+                  /*
+                  _buildRozaCard(context, progressProvider),
+                  const SizedBox(height: 16),
+                  */
+                  
+                  // 2. Salah Card
+                  _buildSalahCard(context),
+                  const SizedBox(height: 16),
+                  
+                  // 3. Extra Namaz Card
+                  _buildExtraNamazCard(context, progressProvider),
+                  const SizedBox(height: 16),
+                  
+                  // 4. Tilawat Card
+                  _buildTilawatCard(context, tilawatProvider),
+                  const SizedBox(height: 16),
 
-            // 6. Zikr Card
-            _buildZikrCard(context, zikrList),
-            
-            // Bottom spacing to ensure content isn't hidden by navbar
-            const SizedBox(height: 40),
+                  // 5. Zikr Card
+                  _buildZikrCard(context, zikrList),
+                  const SizedBox(height: 16),
+                  
+                  // 6. Daily Reflection Card
+                  _buildReflectionCard(context, progressProvider),
+      
+                  
+                  
+                  // Bottom spacing to ensure content isn't hidden by navbar
+                  const SizedBox(height: 40),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -143,33 +155,48 @@ class _HomeContent extends StatelessWidget {
 
   // --- Helper Widgets ---
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     final now = DateTime.now();
-    final gregorianDate = DateFormat('d MMMM').format(now);
+    final gregorianDate = DateFormat('d MMMM yyyy').format(now);
     
-    final hijriDate = HijriCalendar.now();
-    final hijriString = "${hijriDate.hDay} ${hijriDate.longMonthName}";
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        const Text(
-          "Amaal Tracker",
-          style: TextStyle(
-            fontSize: 24, 
-            fontWeight: FontWeight.w800, 
-            height: 1.2, 
-            color: AppColors.textDark
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(12, 25, 12, 25),
+      decoration: const BoxDecoration(
+        color: AppColors.primaryDark,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(32),
+          bottomRight: Radius.circular(32),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                "Amaal Tracker",
+                style: TextStyle(
+                  fontSize: 28, 
+                  fontWeight: FontWeight.w800, 
+                  color: Colors.white,
+                  letterSpacing: -0.5,
+                ),
+              ),
+            ],
           ),
-        ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(gregorianDate, style: const TextStyle(fontSize: 14, color: AppColors.textGrey, fontWeight: FontWeight.w500)),
-            Text(hijriString, style: const TextStyle(fontSize: 14, color: AppColors.textGrey, fontWeight: FontWeight.w500)),
-          ],
-        ),
-      ],
+          const SizedBox(height: 12),
+          Text(
+            gregorianDate, 
+            style: TextStyle(
+              fontSize: 15, 
+              color: Colors.white.withOpacity(0.8), 
+              fontWeight: FontWeight.w500
+            )
+          ),
+        ],
+      ),
     );
   }
 
@@ -205,21 +232,28 @@ class _HomeContent extends StatelessWidget {
   }
 
   Widget _buildSalahCard(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      decoration: _cardDecoration(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Padding(padding: EdgeInsets.only(top: 10, bottom: 5), child: Text("Salah", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textDark))),
-          _buildSalahItem(context, "Fajr"), _buildDivider(),
-          _buildSalahItem(context, "Dhuhr"), _buildDivider(),
-          _buildSalahItem(context, "Asr"), _buildDivider(),
-          _buildSalahItem(context, "Maghrib"), _buildDivider(),
-          _buildSalahItem(context, "Isha"), _buildDivider(),
-          _buildSalahItem(context, "Taraweeh"),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(left: 4, bottom: 12),
+          child: Text("Fard Salah", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.textDark)),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          decoration: _cardDecoration(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildSalahItem(context, "Fajr"), _buildDivider(),
+              _buildSalahItem(context, "Dhuhr"), _buildDivider(),
+              _buildSalahItem(context, "Asr"), _buildDivider(),
+              _buildSalahItem(context, "Maghrib"), _buildDivider(),
+              _buildSalahItem(context, "Isha"), 
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -232,11 +266,23 @@ class _HomeContent extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween, 
           children: [
-            Row(children: [
-              Text(name, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Color(0xFF424242))), 
-              if (isCompleted) ...[const SizedBox(width: 8), const Icon(Icons.check_circle, color: AppColors.primary, size: 16)]
-            ]), 
-            const Icon(Icons.chevron_right, color: Colors.grey, size: 20)
+            Text(name, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Color(0xFF424242))), 
+            SizedBox(
+              height: 30,
+              child: OutlinedButton(
+                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => SalahDetailScreen(prayerName: name))),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: isCompleted ? AppColors.primary : const Color(0xFFE0E0E0)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  backgroundColor: isCompleted ? AppColors.primary.withOpacity(0.05) : Colors.transparent,
+                ),
+                child: Text(
+                  isCompleted ? "Done" : "Enter", 
+                  style: TextStyle(color: isCompleted ? AppColors.primary : const Color(0xFF616161), fontSize: 12, fontWeight: FontWeight.w600)
+                )
+              ),
+            ),
           ]
         ),
       ),
@@ -244,134 +290,186 @@ class _HomeContent extends StatelessWidget {
   }
 
   Widget _buildExtraNamazCard(BuildContext context, DailyProgressProvider provider) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: _cardDecoration(),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [const Text("Nawafil", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textDark))]),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+         const Padding(
+          padding: EdgeInsets.only(left: 4, bottom: 12),
+          child: Text("Nawafil", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.textDark)),
+        ),
+        Row(
+          children: [
+            Expanded(child: _buildNamazBox(context, "Tahajjud", provider.isExtraSalahDone("Tahajjud"))),
+            const SizedBox(width: 16),
+            Expanded(child: _buildNamazBox(context, "Ishraq", provider.isExtraSalahDone("Ishraq"))),
+          ],
+        ),
         const SizedBox(height: 16),
-        _buildExtraSalahItem(context, "Tahajjud", provider.isExtraSalahDone("Tahajjud")), const SizedBox(height: 14),
-        _buildExtraSalahItem(context, "Ishraq", provider.isExtraSalahDone("Ishraq")), const SizedBox(height: 14),
-        _buildExtraSalahItem(context, "Chasht", provider.isExtraSalahDone("Chasht")), const SizedBox(height: 14),
-        _buildExtraSalahItem(context, "Awwabin", provider.isExtraSalahDone("Awwabin")),
-      ]),
+        Row(
+          children: [
+            Expanded(child: _buildNamazBox(context, "Chasht", provider.isExtraSalahDone("Chasht"))),
+            const SizedBox(width: 16),
+            Expanded(child: _buildNamazBox(context, "Awwabin", provider.isExtraSalahDone("Awwabin"))),
+          ],
+        ),
+      ],
     );
   }
 
-  Widget _buildExtraSalahItem(BuildContext context, String name, bool isChecked) {
-    // Checkbox state typically comes from parent, but let's ensure we are reactive if needed
-    // In this specific build flow, `_buildExtraNamazCard` passes `provider.isExtraSalahDone`
-    // and `_buildExtraNamazCard` is called in `build` where `provider` is obtained via `watch`.
-    // So `isChecked` passed down SHOULD be correct if the parent rebuilds.
-    // Let's check `_buildSuhoorCard` too.
-    return Row(children: [
-      GestureDetector(
-        onTap: () => context.read<DailyProgressProvider>().toggleExtraSalah(name),
-        child: AnimatedContainer(duration: const Duration(milliseconds: 200), width: 24, height: 24, decoration: BoxDecoration(borderRadius: BorderRadius.circular(6), border: Border.all(color: isChecked ? AppColors.primary : Colors.grey.shade300, width: 2), color: isChecked ? AppColors.primary : Colors.transparent), child: isChecked ? const Icon(Icons.check, size: 16, color: Colors.white) : null),
+  Widget _buildNamazBox(BuildContext context, String name, bool isChecked) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: _cardDecoration(),
+      child: Row(
+        children: [
+          _buildCheckbox(isChecked, () => context.read<DailyProgressProvider>().toggleExtraSalah(name)),
+          const SizedBox(width: 12),
+          Text(name, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textDark)),
+        ],
       ),
-      const SizedBox(width: 12),
-      Text(name, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Color(0xFF424242))),
-    ]);
+    );
+  }
+
+  Widget _buildCheckbox(bool isChecked, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200), 
+        width: 24, 
+        height: 24, 
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(6), 
+          border: Border.all(color: isChecked ? AppColors.accentPurple : Colors.grey.shade300, width: 2), 
+          color: isChecked ? Colors.transparent : Colors.transparent,
+        ), 
+        child: isChecked ? const Icon(Icons.check, size: 16, color: AppColors.accentPurple) : null,
+      ),
+    );
   }
 
   Widget _buildTilawatCard(BuildContext context, TilawatProvider tilawatProvider) {
-    return GestureDetector(
-      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const TilawatScreen())),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: _cardDecoration(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(left: 4, bottom: 12),
+          child: Text("Tilawat-e-Quran", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.textDark)),
+        ),
+        GestureDetector(
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const TilawatScreen())),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: _cardDecoration(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text("Tilawat", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textDark)),
-                Text("Progress ${(tilawatProvider.progressPercentage * 100).toInt()}%", style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Juz ${tilawatProvider.currentJuz}", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textDark)),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: tilawatProvider.progressPercentage,
+                    backgroundColor: const Color(0xFFE8F5E9),
+                    valueColor: const AlwaysStoppedAnimation<Color>(AppColors.accentPurple),
+                    minHeight: 10,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text("Progress", style: TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.w500)),
+                    Text("${(tilawatProvider.progressPercentage * 100).toInt()}%", style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.grey)),
+                  ],
+                ),
               ],
             ),
-            const SizedBox(height: 8),
-            Text("Juz ${tilawatProvider.currentJuz} • ${tilawatProvider.totalPagesRead} Pages Read", style: const TextStyle(color: Colors.grey, fontSize: 13)),
-            const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(
-                value: tilawatProvider.progressPercentage,
-                backgroundColor: const Color(0xFFF0F0F0),
-                valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
-                minHeight: 6,
-              ),
-            ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 
 
   Widget _buildReflectionCard(BuildContext context, DailyProgressProvider provider) {
     final reflections = [
-      {'key': AppConstants.reflectionLying, 'label': "Avoided Lying(Jhut)"},
-      {'key': AppConstants.reflectionBackbiting, 'label': "Avoided Backbiting(Geebat)"},
+      {'key': AppConstants.reflectionLying, 'label': "Avoided Lying(Jhoot)"},
+      {'key': AppConstants.reflectionBackbiting, 'label': "Avoided Backbiting(Gheebat)"},
       {'key': AppConstants.reflectionGaze, 'label': "Lowered Gaze(Bad Nazri)"},
       {'key': AppConstants.reflectionArgument, 'label': "Avoided Argument(Jhagda)"},
-      {'key': AppConstants.reflectionNegativeThoughts, 'label': "Negative Thoughts(Buri Soch)"},
+      {'key': AppConstants.reflectionNegativeThoughts, 'label': "Negative Thoughts(Bura Khayal)"},
     ];
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: _cardDecoration(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text("Daily Reflection", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textDark)),
-          const SizedBox(height: 4),
-          const Text("Self Control & Habits", style: TextStyle(fontSize: 12, color: Colors.grey)),
-          const SizedBox(height: 16),
-          ...reflections.map((r) => _buildReflectionItem(context, r['key']!, r['label']!, provider.isReflectionDone(r['key']!))).toList(),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(left: 4, bottom: 12),
+          child: Text("Daily Reflection", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.textDark)),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          decoration: _cardDecoration(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ...reflections.map((r) => _buildReflectionItem(context, r['key']!, r['label']!, provider.isReflectionDone(r['key']!))).toList(),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildReflectionItem(BuildContext context, String key, String label, bool isChecked) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
-      child: Row(children: [
-        GestureDetector(
-          onTap: () => context.read<DailyProgressProvider>().toggleReflection(key),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200), 
-            width: 24, height: 24, 
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(6), 
-              border: Border.all(color: isChecked ? AppColors.primary : Colors.grey.shade300, width: 2), 
-              color: isChecked ? AppColors.primary : Colors.transparent
-            ), 
-            child: isChecked ? const Icon(Icons.check, size: 16, color: Colors.white) : null
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(label, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Color(0xFF424242))),
+              _buildCheckbox(isChecked, () => context.read<DailyProgressProvider>().toggleReflection(key)),
+            ],
           ),
         ),
-        const SizedBox(width: 12),
-        Text(label, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Color(0xFF424242))),
-      ]),
+        if (key != AppConstants.reflectionNegativeThoughts) _buildDivider(),
+      ],
     );
   }
 
   Widget _buildZikrCard(BuildContext context, List<Map<String, dynamic>> zikrList) {
-    return GestureDetector(
-      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const TasbeehListScreen())),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: _cardDecoration(),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: const [Text("Zikr", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textDark))]),
-          const SizedBox(height: 16),
-          if (zikrList.isEmpty) Center(child: TextButton.icon(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const TasbeehListScreen())), icon: const Icon(Icons.add, color: AppColors.primary), label: const Text("Start your first Zikr", style: TextStyle(color: AppColors.primary))))
-          else ListView.separated(physics: const NeverScrollableScrollPhysics(), shrinkWrap: true, itemCount: zikrList.length > 3 ? 3 : zikrList.length, separatorBuilder: (context, index) => const SizedBox(height: 12), itemBuilder: (context, index) => _buildDynamicZikrItem(context, zikrList[index])),
-          const SizedBox(height: 20),
-          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [const Text("// Tap card to manage all", style: TextStyle(fontFamily: 'Courier', fontSize: 12, color: Color(0xFFB0B0B0))), if (zikrList.isNotEmpty) const Icon(Icons.arrow_forward, size: 14, color: Colors.grey)]),
-        ]),
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(left: 4, bottom: 12),
+          child: Text("Tasbih & Zikr", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.textDark)),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          decoration: _cardDecoration(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start, 
+            children: [
+              if (zikrList.isEmpty) Center(child: TextButton.icon(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const TasbeehListScreen())), icon: const Icon(Icons.add, color: AppColors.primary), label: const Text("Start your first Zikr", style: TextStyle(color: AppColors.primary))))
+              else ListView.separated(
+                physics: const NeverScrollableScrollPhysics(), 
+                shrinkWrap: true, 
+                itemCount: zikrList.length, 
+                separatorBuilder: (context, index) => _buildDivider(), 
+                itemBuilder: (context, index) => _buildDynamicZikrItem(context, zikrList[index])
+              ),
+            ]
+          ),
+        ),
+      ],
     );
   }
 

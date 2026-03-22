@@ -78,45 +78,38 @@ class _DailyReportViewState extends State<DailyReportView> {
       controller: ShareUtil.screenshotController,
       child: Container(
         color: const Color(0xFFFDFAF6), // Match scaffold background
-        child: Column(
-          children: [
-            _buildCircularProgress(completionPercentage),
-        const SizedBox(height: 16),
-        Text("Today: ${(completionPercentage * 100).toInt()}% Salah Complete", 
-          style: const TextStyle(color: Colors.grey, fontSize: 14, fontWeight: FontWeight.w500)),
-        const SizedBox(height: 30),
-        
-        Row(
-          children: [
-             Expanded(child: _buildInfoCard(
-               title: "Roza Niyah", 
-               icon: Icons.favorite_rounded, 
-               content: Text(provider.isRozaNiyatDone ? "Done" : "Not Done", 
-                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: provider.isRozaNiyatDone ? AppColors.primary : Colors.grey))
-             )),
-             const SizedBox(width: 16),
-             Expanded(child: _buildInfoCard(
-               title: "Tilawat", 
-               icon: Icons.menu_book_rounded, 
-               content: Text("${provider.tilawatPages} Pages", 
-                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textDark))
-             )),
-          ],
-        ),
-        const SizedBox(height: 16),
-        
-        Row(
-          children: [
-            Expanded(child: _buildInfoCard(
-              title: "Duas", 
-              icon: Icons.volunteer_activism, 
-              content: Text("$completedDuas/$totalDuas", 
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.primary))
-            )),
-            const SizedBox(width: 16),
-            const Spacer(),
-          ],
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.only(top: 20, bottom: 40),
+          child: Column(
+            children: [
+            _buildCircularProgress(completionPercentage, completedSalah, totalSalah),
+            const SizedBox(height: 30),
+            
+            Row(
+              children: [
+                 Expanded(child: _buildSimpleInfoCard(
+                   title: "Tilawat", 
+                   icon: Icons.menu_book_outlined, 
+                   value: "${provider.tilawatPages}",
+                   unit: "Pages"
+                 )),
+                 const SizedBox(width: 12),
+                 Expanded(child: _buildSimpleInfoCard(
+                   title: "Nawafil", 
+                   icon: Icons.auto_awesome_outlined, 
+                   value: "${provider.calculateExtraSalahDone()}",
+                   unit: "/4"
+                 )),
+                 const SizedBox(width: 12),
+                 Expanded(child: _buildSimpleInfoCard(
+                   title: "Duas", 
+                   icon: Icons.front_hand_outlined, 
+                   value: "$completedDuas",
+                   unit: "Recited"
+                 )),
+              ],
+            ),
         const SizedBox(height: 16),
         
         const SizedBox(height: 16),
@@ -197,9 +190,8 @@ class _DailyReportViewState extends State<DailyReportView> {
             onPressed: () async {
               final text = "My Islamic Daily Progress:\n"
                            "- Salah: ${(completionPercentage * 100).toInt()}%\n"
-                           "- Roza Niyah: ${provider.isRozaNiyatDone ? 'Done' : 'Not Done'}\n"
                            "- Tilawat: ${provider.tilawatPages} Pages\n"
-                           "Shared via Ramaz Amaal Tracker";
+                           "Shared via ${AppConstants.appName}";
               
               try {
                 final uint8list = await ShareUtil.screenshotController.capture();
@@ -232,39 +224,57 @@ class _DailyReportViewState extends State<DailyReportView> {
           ),
         ),
         const SizedBox(height: 30),
-      ],
-    ),
-  ),
-);
-  }
-
-  Widget _buildCircularProgress(double value) {
-    return Stack(alignment: Alignment.center, children: [
-      SizedBox(width: 160, height: 160, 
-        child: CircularProgressIndicator(
-          value: value, 
-          strokeWidth: 12, 
-          backgroundColor: Colors.grey.shade100, 
-          valueColor: const AlwaysStoppedAnimation(AppColors.primary), 
-          strokeCap: StrokeCap.round
-        )
+            ],
+          ),
+        ),
       ),
-      Column(mainAxisSize: MainAxisSize.min, children: [
-        Text("${(value * 100).toInt()}%", 
-          style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w800, color: AppColors.textDark))
-      ]),
-    ]);
+    );
   }
 
-  Widget _buildInfoCard({required String title, required IconData icon, required Widget content}) {
+  Widget _buildCircularProgress(double value, int completed, int total) {
+    return Column(
+      children: [
+        Stack(alignment: Alignment.center, children: [
+          SizedBox(width: 180, height: 180, 
+            child: CircularProgressIndicator(
+              value: value, 
+              strokeWidth: 16, 
+              backgroundColor: const Color(0xFFE8F5E9), 
+              valueColor: const AlwaysStoppedAnimation(AppColors.primaryDark), 
+              strokeCap: StrokeCap.round
+            )
+          ),
+          Text("${(value * 100).toInt()}%", 
+              style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w800, color: AppColors.textDark))
+        ]),
+        const SizedBox(height: 24),
+        Text("Today $completed/$total Salah Completed", 
+          style: const TextStyle(color: AppColors.textDark, fontSize: 18, fontWeight: FontWeight.w700)),
+      ],
+    );
+  }
+
+  Widget _buildSimpleInfoCard({required String title, required IconData icon, required String value, required String unit}) {
     return Container(
-      height: 100,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24), boxShadow: [BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 4))]),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey)), Icon(icon, size: 18, color: AppColors.primary)]),
-        content,
-      ]),
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.withOpacity(0.05)), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 8, offset: const Offset(0, 4))]),
+      child: Column(
+        children: [
+          Icon(icon, size: 22, color: AppColors.accent),
+          const SizedBox(height: 8),
+          Text(title, style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w500)),
+          const SizedBox(height: 4),
+          RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(text: value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textDark)),
+                const TextSpan(text: " "),
+                TextSpan(text: unit, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF4C8C74))),
+              ]
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -277,46 +287,41 @@ class _DailyReportViewState extends State<DailyReportView> {
       if (provider.isReflectionDone(key)) completed++;
     }
 
-    return Container(
-       padding: const EdgeInsets.all(20),
-       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24), boxShadow: [BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 4))]),
-       child: Column(
-         crossAxisAlignment: CrossAxisAlignment.start,
-         children: [
-           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-             const Text("Self Reflection", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textDark)),
-             Container(
-               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), 
-               decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(8)), 
-               child: Text("$completed/${reflectionKeys.length}", style: const TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.w600))
-             )
-           ]),
-           const SizedBox(height: 16),
-           Wrap(
-             spacing: 8,
-             runSpacing: 8,
+    return Column(
+      children: [
+        Row(children: [
+          const Icon(Icons.visibility_outlined, size: 20, color: AppColors.accent),
+          const SizedBox(width: 8),
+          const Text("Self Reflection", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.textDark)),
+        ]),
+        const SizedBox(height: 12),
+        Container(
+           padding: const EdgeInsets.symmetric(vertical: 8),
+           decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 8, offset: const Offset(0, 4))]),
+           child: Column(
              children: reflectionKeys.map((key) {
                bool isDone = provider.isReflectionDone(key);
-               return Container(
-                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                 decoration: BoxDecoration(
-                   color: isDone ? const Color(0xFFE8F5E9) : const Color(0xFFFAFAFA),
-                   borderRadius: BorderRadius.circular(20),
-                   border: Border.all(color: isDone ? Colors.transparent : Colors.grey.shade200),
-                 ),
-                 child: Row(
-                   mainAxisSize: MainAxisSize.min,
-                   children: [
-                     Icon(isDone ? Icons.check_circle : Icons.circle_outlined, size: 16, color: isDone ? AppColors.primary : Colors.grey),
-                     const SizedBox(width: 6),
-                     Text(key, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: isDone ? AppColors.primary : Colors.grey[700])),
-                   ],
-                 ),
+               String label = key;
+               if (key == AppConstants.reflectionLying) label = "Avoided Lying(Jhoot)";
+               if (key == AppConstants.reflectionBackbiting) label = "Avoided Backbiting(Gheebat)";
+               if (key == AppConstants.reflectionGaze) label = "Lowered Gaze(Bad Nazri)";
+               if (key == AppConstants.reflectionArgument) label = "Avoided Argument(Jhagda)";
+               if (key == AppConstants.reflectionNegativeThoughts) label = "Negative Thoughts(Bura Khayal)";
+
+               return Column(
+                 children: [
+                   ListTile(
+                    dense: true,
+                    title: Text(label, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: isDone ? AppColors.textDark : Colors.grey)),
+                    trailing: Icon(isDone ? Icons.check_circle : Icons.circle_outlined, color: isDone ? Colors.green : Colors.blue.withOpacity(0.2)),
+                   ),
+                   if (key != reflectionKeys.last) const Divider(height: 1, indent: 16, endIndent: 16, color: Color(0xFFF5F5F5)),
+                 ],
                );
              }).toList(),
-           )
-         ],
-       ),
+           ),
+        ),
+      ],
     );
   }
 
@@ -331,20 +336,34 @@ class _DailyReportViewState extends State<DailyReportView> {
       activeZikrs.addAll(zikrs.take(2));
     }
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24), boxShadow: [BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 4))]),
-      child: Column(children: [
-        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: const [Text("Zikr & Duas", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textDark)), Icon(Icons.pie_chart_outline, size: 18, color: Colors.grey)]),
-        const SizedBox(height: 20),
-        if (zikrs.isEmpty)
-           const Center(child: Text("No Zikr added yet", style: TextStyle(color: Colors.grey)))
-        else
-           ...activeZikrs.map((z) => Padding(
-             padding: const EdgeInsets.only(bottom: 12.0),
-             child: _buildZikrProgress(z['name'], "Target: ${z['targetCount']}", z['currentCount'], z['targetCount']),
-           )),
-      ]),
+    return Column(
+      children: [
+        Row(children: [
+          const Icon(Icons.list_alt, size: 20, color: AppColors.accent),
+          const SizedBox(width: 8),
+          const Text("Zikr & Duas", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.textDark)),
+        ]),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 8, offset: const Offset(0, 4))]),
+          child: Column(children: [
+            if (zikrs.isEmpty)
+               const Center(child: Text("No Zikr added yet", style: TextStyle(color: Colors.grey)))
+            else
+               ...zikrs.map((z) => Padding(
+                 padding: const EdgeInsets.only(bottom: 12.0),
+                 child: Row(
+                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                   children: [
+                     Text(z['name'], style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.textDark, fontSize: 15)),
+                     Text("${z['currentCount']} / ${z['targetCount']}", style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Color(0xFF4C8C74))),
+                   ],
+                 ),
+               )),
+          ]),
+        ),
+      ],
     );
   }
 

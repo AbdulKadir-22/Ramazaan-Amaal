@@ -72,19 +72,37 @@ class _DuaScreenState extends State<DuaScreen> {
   Widget _buildHeader(BuildContext context, int readCount, double progress) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(20, 48, 20, 32),
+      padding: const EdgeInsets.fromLTRB(24, 48, 24, 32),
       decoration: const BoxDecoration(
-        color: Color(0xFF346943), // Dark green from design
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(0)),
+        gradient: LinearGradient(
+          colors: [AppColors.primaryDark, AppColors.primary],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(32),
+          bottomRight: Radius.circular(32),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
+              IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.favorite_border_rounded, color: Colors.white, size: 20),
               ),
             ],
           ),
@@ -94,25 +112,27 @@ class _DuaScreenState extends State<DuaScreen> {
             style: TextStyle(
               color: Colors.white,
               fontSize: 28,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            "$readCount Duas Read",
+            "$readCount Duas Completed Today",
             style: TextStyle(
               color: Colors.white.withOpacity(0.8),
-              fontSize: 15,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           ClipRRect(
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(10),
             child: LinearProgressIndicator(
               value: progress,
-              backgroundColor: Colors.white.withOpacity(0.2),
+              backgroundColor: Colors.white.withOpacity(0.15),
               valueColor: const AlwaysStoppedAnimation(Colors.white),
-              minHeight: 6,
+              minHeight: 8,
             ),
           ),
         ],
@@ -158,16 +178,16 @@ class _DuaScreenState extends State<DuaScreen> {
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isDone ? const Color(0xFFE8F1EB) : Colors.white, // Light green tint if done
+          color: isDone ? AppColors.primary.withOpacity(0.08) : Colors.white, // Light green tint if done
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: isDone ? const Color(0xFF346943).withOpacity(0.1) : Colors.transparent,
+            color: isDone ? AppColors.primary.withOpacity(0.2) : Colors.grey.withOpacity(0.1),
             width: 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.02),
-              blurRadius: 10,
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 12,
               offset: const Offset(0, 4),
             ),
           ],
@@ -215,11 +235,11 @@ class _DuaScreenState extends State<DuaScreen> {
                 height: 28,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: isDone ? const Color(0xFF346943) : Colors.white,
+                  color: isDone ? AppColors.primary : Colors.white,
                   border: isDone ? null : Border.all(color: Colors.grey.shade300, width: 2),
                 ),
                 child: isDone
-                    ? const Icon(Icons.check, size: 16, color: Colors.white)
+                    ? const Icon(Icons.check_rounded, size: 16, color: Colors.white)
                     : null,
               ),
             ),

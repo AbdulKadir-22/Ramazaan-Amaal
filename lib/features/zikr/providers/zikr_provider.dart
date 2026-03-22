@@ -14,11 +14,23 @@ class ZikrProvider extends ChangeNotifier {
 
   // --- 1. Load Data ---
   void loadZikrData() {
-    final rawList = _box.get('zikr_list', defaultValue: []);
-    // distinct conversion to ensure type safety
-    _zikrList = List<Map<String, dynamic>>.from(
-      rawList.map((e) => Map<String, dynamic>.from(e))
-    );
+    final rawList = _box.get('zikr_list') as List?;
+    
+    if (rawList == null || rawList.isEmpty) {
+      final now = DateTime.now().toIso8601String().split('T')[0];
+      final defaults = [
+        {'id': const Uuid().v4(), 'name': 'Astagfirullah', 'currentCount': 0, 'targetCount': 100, 'reminderTime': null, 'lastUpdatedDate': now},
+        {'id': const Uuid().v4(), 'name': 'Subhanallah', 'currentCount': 0, 'targetCount': 100, 'reminderTime': null, 'lastUpdatedDate': now},
+        {'id': const Uuid().v4(), 'name': 'Alhamdullillah', 'currentCount': 0, 'targetCount': 100, 'reminderTime': null, 'lastUpdatedDate': now},
+        {'id': const Uuid().v4(), 'name': 'Allahu Akbar', 'currentCount': 0, 'targetCount': 100, 'reminderTime': null, 'lastUpdatedDate': now},
+      ];
+      _zikrList = List<Map<String, dynamic>>.from(defaults);
+      _saveToHive();
+    } else {
+      _zikrList = rawList.map((e) {
+        return Map<String, dynamic>.from(e as Map);
+      }).toList();
+    }
     
     _checkDailyReset();
     notifyListeners();

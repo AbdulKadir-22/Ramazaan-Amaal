@@ -9,6 +9,8 @@ import 'features/home/providers/daily_progress_provider.dart';
 import 'features/tilawat/providers/tilawat_provider.dart';
 import 'features/salah/providers/prayer_reminder_provider.dart';
 import 'core/providers/notification_settings_provider.dart';
+import 'features/dua/providers/dua_provider.dart';
+
 import 'features/home/screens/home_screen.dart';
 import 'features/onboarding/screens/name_screen.dart';
 
@@ -46,7 +48,9 @@ class RamazanTrackerApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => TilawatProvider()..loadTilawatData()),
         ChangeNotifierProvider(create: (_) => PrayerReminderProvider()..loadTimes()),
         ChangeNotifierProvider(create: (_) => NotificationSettingsProvider()..loadSettings()),
+        ChangeNotifierProvider(create: (_) => DuaProvider()..loadDuas()),
       ],
+
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Ramazan Amaal Tracker',

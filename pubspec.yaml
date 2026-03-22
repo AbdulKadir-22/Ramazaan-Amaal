@@ -47,6 +47,7 @@ flutter:
 
   assets:
     - assets/Ramzan-Amaal-Logo.png
+    - assets/data/
 
 flutter_launcher_icons:
   android: true

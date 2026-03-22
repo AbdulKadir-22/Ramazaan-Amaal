@@ -167,7 +167,7 @@ class SettingsScreen extends StatelessWidget {
               ),
               const Divider(height: 32),
               _buildDeveloperProfile(
-                name: "Ruksana Bhamji",
+                name: "Rukshana Bhamji",
                 role: "Database Engineer",
                 bio: "I'm an aspiring database engineer who is working on projects like this to build robust data architectures for the community.",
                 githubId: "@RukshanaBhamji",
@@ -337,13 +337,26 @@ class SettingsScreen extends StatelessWidget {
                     Icon(Icons.auto_awesome, color: Color(0xFF10B981), size: 20),
                     SizedBox(width: 12),
                     Expanded(
-                      child: Text(
-                        "More updates coming soon, In Sha Allah!",
-                        style: TextStyle(
-                          color: Color(0xFF15803D),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text(
+                            "More updates coming soon, In Sha Allah!",
+                            style: TextStyle(
+                              color: Color(0xFF15803D),
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                            ),
+                          ),
+                          Text(
+                            "Version 1.0.1 (Build 3)",
+                            style: TextStyle(
+                              color: Color(0xFF15803D),
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],

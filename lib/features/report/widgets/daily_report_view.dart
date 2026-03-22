@@ -8,7 +8,9 @@ import '../../zikr/providers/zikr_provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/share_util.dart';
+import '../../dua/providers/dua_provider.dart';
 import 'package:screenshot/screenshot.dart';
+
 
 class DailyReportView extends StatefulWidget {
   const DailyReportView({super.key});
@@ -58,11 +60,13 @@ class _DailyReportViewState extends State<DailyReportView> {
     double completionPercentage = (completedSalah / totalSalah);
 
     // Calculate Duas completion
-    final totalDuas = AppConstants.duaTitles.length; 
+    final duaProvider = context.watch<DuaProvider>();
+    final totalDuas = duaProvider.allDuas.length; 
     int completedDuas = 0;
-    for (var title in AppConstants.duaTitles) {
-      if (provider.isDuaDone(title)) completedDuas++;
+    for (var dua in duaProvider.allDuas) {
+      if (provider.isDuaDone(dua.title)) completedDuas++;
     }
+
 
     // Sync Zikr to DailyRecord for historical tracking
     final zikrProvider = context.read<ZikrProvider>();

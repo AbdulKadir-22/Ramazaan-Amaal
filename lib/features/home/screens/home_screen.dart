@@ -111,7 +111,7 @@ class _HomeContent extends StatelessWidget {
             const SizedBox(height: 24),
             
             // 1. Roza Card (Replaces Suhoor Card)
-            _buildRozaCard(context, progressProvider),
+            // _buildRozaCard(context, progressProvider),
             const SizedBox(height: 16),
             
             // 2. Salah Card
@@ -154,7 +154,7 @@ class _HomeContent extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         const Text(
-          "Ramazan Amaal\nTracker",
+          "Amaal Tracker",
           style: TextStyle(
             fontSize: 24, 
             fontWeight: FontWeight.w800, 
@@ -314,7 +314,7 @@ class _HomeContent extends StatelessWidget {
       {'key': AppConstants.reflectionLying, 'label': "Avoided Lying(Jhut)"},
       {'key': AppConstants.reflectionBackbiting, 'label': "Avoided Backbiting(Geebat)"},
       {'key': AppConstants.reflectionGaze, 'label': "Lowered Gaze(Bad Nazri)"},
-      {'key': AppConstants.reflectionArgument, 'label': "Avoided Argument(Jhada)"},
+      {'key': AppConstants.reflectionArgument, 'label': "Avoided Argument(Jhagda)"},
       {'key': AppConstants.reflectionNegativeThoughts, 'label': "Negative Thoughts(Buri Soch)"},
     ];
 

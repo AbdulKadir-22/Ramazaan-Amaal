@@ -9,6 +9,7 @@ import '../../../core/services/storage_service.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/share_util.dart';
+import '../../../core/utils/hijri_utils.dart';
 import 'package:screenshot/screenshot.dart';
 
 class MonthlyReportView extends StatefulWidget {
@@ -36,7 +37,7 @@ class _MonthlyReportViewState extends State<MonthlyReportView> {
 
   Future<Map<String, dynamic>> _fetchMonthlyReportData() async {
     final now = DateTime.now();
-    final hijriNow = HijriCalendar.now();
+    final hijriNow = HijriUtils.now();
     final targetMonth = hijriNow.hMonth;
     
     // We want to find the range of the current Hijri month progress
@@ -45,7 +46,7 @@ class _MonthlyReportViewState extends State<MonthlyReportView> {
     // Look back up to 40 days to find all records of the target Hijri month
     for (int i = 0; i < 40; i++) {
         final date = now.subtract(Duration(days: i));
-        final hDate = HijriCalendar.fromDate(date);
+        final hDate = HijriUtils.getAdjustedHijri(date);
         
         if (hDate.hMonth == targetMonth) {
             final record = _storage.getDailyRecord(date);

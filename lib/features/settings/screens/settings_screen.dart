@@ -120,7 +120,7 @@ class SettingsScreen extends StatelessWidget {
                   SizedBox(height: 8),
                   Text("جزاك الله خيرا", style: TextStyle(color: Color(0xFF1A1F1D), fontSize: 16, fontFamily: 'Arial', fontWeight: FontWeight.w600)),
                   SizedBox(height: 8),
-                  Text("v1.0.0", style: TextStyle(color: Color(0xFFBDBDBD), fontSize: 10)),
+                  Text("v1.1.1 - Build 3", style: TextStyle(color: Color(0xFFBDBDBD), fontSize: 10)),
                 ]),
               ),
               const SizedBox(height: 20),

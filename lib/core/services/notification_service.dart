@@ -26,6 +26,7 @@ class NotificationService {
 
   // Notification IDs
   static const int ID_DAILY_REPORT = 1000;
+  static const int ID_FIXED_FAJR = 1001; 
   static const int ID_TILAWAT = 999;
   static const int ID_FAJR = 101;
   static const int ID_DHUHR = 102;
@@ -241,11 +242,22 @@ class NotificationService {
   Future<void> scheduleDailyReportNotification() async {
     await scheduleDailyNotification(
       id: ID_DAILY_REPORT,
-      title: "📊 Your Daily Report is Here",
-      body: "Check your progress before you sleep! How was your day today?",
+      title: "📊 Daily Report",
+      body: "Don't forget to check your report for today!",
       time: const TimeOfDay(hour: 22, minute: 0),
       channelId: 'daily_report_reminders',
       channelName: 'Daily Report Reminders',
+    );
+  }
+
+  Future<void> scheduleFixedFajrReminder() async {
+    await scheduleDailyNotification(
+      id: ID_FIXED_FAJR,
+      title: "☀️ Start Your Day",
+      body: "Start your day with Fajr prayer.",
+      time: const TimeOfDay(hour: 6, minute: 0),
+      channelId: 'fixed_reminders',
+      channelName: 'Daily Fixed Reminders',
     );
   }
 

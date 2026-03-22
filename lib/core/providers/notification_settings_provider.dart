@@ -25,6 +25,7 @@ class NotificationSettingsProvider extends ChangeNotifier {
     // Ensure 10 PM notification is scheduled if enabled
     if (_dailyReportEnabled) {
       _notificationService.scheduleDailyReportNotification();
+      _notificationService.scheduleFixedFajrReminder();
     }
     
     notifyListeners();
@@ -36,8 +37,10 @@ class NotificationSettingsProvider extends ChangeNotifier {
     
     if (value) {
       await _notificationService.scheduleDailyReportNotification();
+      await _notificationService.scheduleFixedFajrReminder();
     } else {
       await _notificationService.cancelNotification(NotificationService.ID_DAILY_REPORT);
+      await _notificationService.cancelNotification(NotificationService.ID_FIXED_FAJR);
     }
     
     notifyListeners();

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:hijri/hijri_calendar.dart';
 import 'package:intl/intl.dart';
+import '../../../core/utils/hijri_utils.dart';
 
 // --- Import Core & Providers ---
 import '../../../core/constants/app_colors.dart';
@@ -158,6 +158,8 @@ class _HomeContent extends StatelessWidget {
   Widget _buildHeader(BuildContext context) {
     final now = DateTime.now();
     final gregorianDate = DateFormat('d MMMM yyyy').format(now);
+    final hijriDate = HijriUtils.now();
+    final hijriStr = "${hijriDate.hDay} ${hijriDate.longMonthName} ${hijriDate.hYear} AH";
     
     return Container(
       width: double.infinity,
@@ -187,13 +189,28 @@ class _HomeContent extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          Text(
-            gregorianDate, 
-            style: TextStyle(
-              fontSize: 15, 
-              color: Colors.white.withOpacity(0.8), 
-              fontWeight: FontWeight.w500
-            )
+          Row(
+            children: [
+              Text(
+                gregorianDate, 
+                style: TextStyle(
+                  fontSize: 14, 
+                  color: Colors.white.withOpacity(0.8), 
+                  fontWeight: FontWeight.w500
+                )
+              ),
+              const SizedBox(width: 8),
+              Container(width: 4, height: 4, decoration: BoxDecoration(color: Colors.white.withOpacity(0.3), shape: BoxShape.circle)),
+              const SizedBox(width: 8),
+              Text(
+                hijriStr, 
+                style: const TextStyle(
+                  fontSize: 14, 
+                  color: AppColors.accent, 
+                  fontWeight: FontWeight.w600
+                )
+              ),
+            ],
           ),
         ],
       ),
